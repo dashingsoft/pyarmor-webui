@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 from __future__ import print_function
 
+import argparse
 import logging
 import json
 import os
@@ -200,25 +201,34 @@ class HelperHandler(BaseHTTPRequestHandler):
         }
 
 
-def main(page=''):
+def main(argv):
     logging.basicConfig(
         level=logging.INFO,
         format='%(levelname)-8s %(message)s',
     )
-    try:
-        PORT = int(sys.argv[1])
-    except Exception:
-        PORT = 9096
-    server = socketserver.TCPServer(("", PORT), HelperHandler)
+    parser = argparse.ArgumentParser(
+        prog='pyarmor-webui',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument('-v', '--version', action='version',
+                        version=__version__)
+    parser.add_argument('-p', '--port', type=int, default=9096,
+                        help='Serve port')
+    parser.add_argument('-H', '--host', default='localhost',
+                        help='Bind host')
+    parser.add_argument('-n', '--no-browser', action='store_true',
+                        help='Do not open web browser')
+    parser.add_argument('-i', '--index', default='',
+                        help='Index page')
+    args = parser.parse_args(argv)
+
+    server = socketserver.TCPServer((args.host, args.port), HelperHandler)
     print("Serving HTTP on %s port %s ..." % server.server_address)
-    try:
+    if not args.no_browser:
         from webbrowser import open_new_tab
-        open_new_tab("http://localhost:%d/%s" % (
-            server.server_address[1], page))
-    except Exception:
-        pass
+        open_new_tab("http://%s:%d/%s" % (args.host, args.port, args.index))
     server.serve_forever()
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
