@@ -42,9 +42,17 @@ class HelperHandler(BaseHTTPRequestHandler):
     server_version = "HelperHTTP/" + __version__
     root_handler = RootHandler(__config__)
 
+    def do_OPTIONS(self):
+        """Serve a OPTIONS request."""
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT")
+        self.send_header("Access-Control-Allow-Headers", "content-type")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
     def do_POST(self):
         """Serve a POST request."""
-        t = self.headers.get('Content-Type', 'text/json;charset=UTF-8')
+        t = self.headers.get('Content-Type', 'application/json;charset=UTF-8')
         self.log_message("Content-Type '%s'", t)
 
         n = int(self.headers.get('Content-Length', 0))
@@ -65,9 +73,11 @@ class HelperHandler(BaseHTTPRequestHandler):
         if result:
             data = json.dumps(result).encode()
             self.send_response(200)
-            self.send_header("Content-type", "text/json")
+            self.send_header("Content-type", "application/json")
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT")
+            self.send_header("Access-Control-Allow-Headers", "content-type")
             self.send_header("Last-Modified", self.date_time_string())
             self.end_headers()
             self.wfile.write(data)
