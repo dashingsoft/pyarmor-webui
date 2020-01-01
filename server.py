@@ -1,6 +1,4 @@
 #! /usr/bin/env python
-from __future__ import print_function
-
 import argparse
 import logging
 import json
@@ -46,21 +44,21 @@ class HelperHandler(BaseHTTPRequestHandler):
         """Serve a OPTIONS request."""
         self.send_response(204)
         self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT")
-        self.send_header("Access-Control-Allow-Headers", "content-type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
     def do_POST(self):
         """Serve a POST request."""
         t = self.headers.get('Content-Type', 'application/json;charset=UTF-8')
-        self.log_message("Content-Type '%s'", t)
+        self.log_message("Content-Type: %s", t)
 
         n = int(self.headers.get('Content-Length', 0))
         if n == 0:
             args = {}
         else:
             args = json.loads(self.rfile.read(n).decode())
-        self.log_message("Arguments %s", args)
+        self.log_message("Post-Data: %s", args)
 
         result = dict(err=0)
         try:
@@ -77,7 +75,7 @@ class HelperHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT")
-            self.send_header("Access-Control-Allow-Headers", "content-type")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
             self.send_header("Last-Modified", self.date_time_string())
             self.end_headers()
             self.wfile.write(data)
@@ -228,12 +226,18 @@ def main(argv):
                         help='Bind host')
     parser.add_argument('-n', '--no-browser', action='store_true',
                         help='Do not open web browser')
-    parser.add_argument('-i', '--index', default='',
-                        help='Index page')
+    parser.add_argument('-i', '--index', default='', help='Index page')
+    parser.add_argument('--data-path',
+                        help='Where to save projects and licenses')
     args = parser.parse_args(argv)
 
+    if args.data_path:
+        __config__['homepath'] = args.data_path
+    logging.info("Data path: %s", __config__['homepath'])
+
     server = socketserver.TCPServer((args.host, args.port), HelperHandler)
-    print("Serving HTTP on %s port %s ..." % server.server_address)
+    logging.info("Serving HTTP on %s port %s ...", *server.server_address)
+
     if not args.no_browser:
         from webbrowser import open_new_tab
         open_new_tab("http://%s:%d/%s" % (args.host, args.port, args.index))
