@@ -1,3 +1,4 @@
+import fnmatch
 import logging
 import json
 import os
@@ -50,11 +51,8 @@ class RootHandler(BaseHandler):
         }
 
     def do_listdir(self, args):
-        path = args.get('path', '')
-        if os.path.exists(path):
-            return [x for x in os.listdir(path) if os.path.isdir(x)]
-
-        if sys.platform == 'win32':
+        path = os.path.expandvars(args.get('path', '/'))
+        if path == '/' and sys.platform == 'win32':
             from ctypes import cdll
             drives = cdll.kernel32.GetLogicalDrives()
             result = []
@@ -62,7 +60,19 @@ class RootHandler(BaseHandler):
                 if drives & 1:
                     result.append(chr(i + 65) + ':\\')
                 drives >>= 1
-        return ['/']
+            return result
+
+        if not os.path.exists(path):
+            raise RuntimeError('No %s found' % path)
+
+        x = args.get('filters')
+        filter_type = os.path.isdir if x == 'isdir' \
+            else os.path.isfile if x == 'isfile' \
+            else bool
+        names = [x for x in os.listdir(path) if filter_type(x)]
+
+        pattern = args.get('pattern')
+        return fnmatch.filter(names, pattern) if pattern else names
 
 
 class ProjectHandler(BaseHandler):
@@ -85,16 +95,15 @@ class ProjectHandler(BaseHandler):
         cmd_args = ['init', '--src', path, path]
         call_pyarmor(cmd_args)
 
-        data = args.get('config', {})
         project = Project()
         project.open(path)
 
-        project._update(data)
+        project._update(args)
         project.save(path)
 
         cmd_args = ['build']
-        target = args.get('traget')
-        if target and target not in ('obfuscate', 'default'):
+        target = args.get('build_target')
+        if target:
             cmd_args.extend(['--target', target])
         output = args.get('output')
         if output:
@@ -105,94 +114,69 @@ class ProjectHandler(BaseHandler):
 
         return output if output else os.path.join(path, 'dist')
 
-
     def do_new(self, args):
         c = self._get_config()
-        i = c['counter'] + 1
+        n = c['counter'] + 1
 
         while True:
-            name = 'project-%d' % i
+            name = 'project-%d' % n
             path = os.path.join(self._get_path(), name)
             if not os.path.exists(path):
                 logging.info('Make project path %s', path)
                 os.mkdir(path)
                 break
-            i += 1
+            n += 1
 
         cmd_args = ['init', '--src', path, path]
         call_pyarmor(cmd_args)
 
         project = {
+            'id': n,
             'name': name,
             'title': args.get('title', name),
-            'target': args.get('target', ''),
-            'path': os.path.abspath(path)
         }
 
-        c['projects'][i] = project
-        c['counter'] = i
+        c['projects'].append(project)
+        c['counter'] = n
         self._set_config(c)
 
-        return {
-            'id': i,
-            'project': project
-        }
+        return project
 
     def do_update(self, args):
         c, p = self._get_project(args)
-        if 'target' in args:
-            p['target'] = args['target']
-            self._set_config(c)
+        p.update(args)
+        self._set_config(c)
 
-        data = args.get('config')
-        if data:
-            if 'name' in data:
-                p['name'] = data['name']
-                self._set_config(c)
-            if 'title' in data:
-                p['title'] = data['title']
-                self._set_config(c)
+        path = self._get_project_path(p)
+        project = Project()
+        project.open(path)
+        project._update(args)
+        project.save(path)
 
-            path = p['path']
-            project = Project()
-            project.open(path)
-
-            project._update(data)
-            project.save(path)
-
-        return {
-            'id': args['id'],
-            'project': p,
-            'config': project
-        }
+        return p
 
     def do_list(self, args):
         c = self._get_config()
-        return c['projects'].items()
+        return c['projects']
 
     def do_remove(self, args):
         c, p = self._get_project(args)
         c['projects'].remove(p)
         self._set_config(c)
 
-        if args.get('clean') and p['path'].startswith(self._get_path()):
-            shutil.rmtree(p['path'])
+        if args.get('clean'):
+            path = self._get_project_path(p)
+            if os.path.exists(path):
+                shutil.rmtree(path)
         return p
-
-    def do_info(self, args):
-        c, p = self._get_project(args)
-        path = p['path']
-        project = Project()
-        project.open(path)
-        return project
 
     def do_build(self, args):
         c, p = self._get_project(args)
-        path = p['path']
+        path = self._get_project_path(p)
 
         cmd_args = ['build']
-        target = args.get('traget')
-        if target and target not in ('obfuscate', 'default'):
+        target = args.get('build_traget')
+        if target:
             cmd_args.extend(['--target', target])
         output = args.get('output')
         if output:
@@ -204,10 +188,14 @@ class ProjectHandler(BaseHandler):
 
     def _get_project(self, args):
         c = self._get_config()
-        p = c['projects'].get(args.get('id'))
-        if not p:
-            raise RuntimeError('No project found')
-        return c, p
+        n = args.get('id')
+        for p in c['projects']:
+            if n == p['id']:
+                return c, p
+        raise RuntimeError('No project %s found' % n)
+
+    def _get_project_path(self, project):
+        return os.path.join(self._get_path(), 'project-%s' % project['id'])
 
     def _get_path(self):
         c = self._config
@@ -220,7 +208,7 @@ class ProjectHandler(BaseHandler):
             if not os.path.exists(path):
                 os.makedirs(path)
             with open(filename, 'w') as fp:
-                json.dump(dict(counter=0, projects={}), fp)
+                json.dump(dict(counter=0, projects=[]), fp)
         return filename
 
     def _get_config(self):
@@ -234,72 +222,92 @@ class ProjectHandler(BaseHandler):
 
 class LicenseHandler(BaseHandler):
 
-    counter_file = 'COUNTER'
+    data_file = 'index.json'
+    template = 'reg-%06d'
+    options = {
+        'harddisk': '--bind-disk',
+        'ipv4': '--bind-ipv4',
+        'mac': '--bind-mac',
+        'expired': '--expired',
+        'extra_data': '--bind-data',
+        'disable_restrict_mode': '--disable-restrict-mode',
+    }
 
     def __init__(self, config):
         super().__init__(config)
         self.name = 'license'
 
     def do_new(self, args):
+        c = self._get_config()
+        n = c['counter'] + 1
+
         path = self._get_path()
         output = args.get('output', path)
         cmd_args = ['licenses', '--output', output]
-        cmd_args.extend(args.get('options', []))
+
+        for name, opt in self.options.items():
+            if name in args:
+                cmd_args.append(opt)
+                v = args.get(name)
+                if v:
+                    cmd_args.append(v)
 
         rcode = args.get('rcode')
         if rcode is None:
-            rcode = self._fetch_code()
+            rcode = self.template % n
         cmd_args.append(rcode)
         call_pyarmor(cmd_args)
 
-        return os.path.join(path, rcode, 'license.lic')
+        args['id'] = n
+        args.setdefault('rcode', rcode)
+        c['licenses'].append(args)
+        c['counter'] = n
+        self._set_config(c)
+
+        return args
 
     def do_remove(self, args):
+        c, p = self._get_license(args)
         path = self._get_path()
-        rcode = args.get('rcode')
-        if not rcode:
-            raise RuntimeError('No registration code')
-
+        rcode = p['rcode']
         licpath = os.path.join(path, rcode)
         if os.path.exists(licpath):
             shutil.rmtree(licpath)
-        return os.path.join(licpath, 'license.lic')
+        return p
 
     def do_list(self, args=None):
-        path = self._get_path()
-        return [x for x in os.listdir(path) if os.path.isdir(x)]
+        c = self._get_config()
+        return c['licenses']
 
-    def do_info(self, args):
-        path = self._get_path()
-        rcode = args.get('rcode')
-        if not rcode:
-            raise RuntimeError('No registration code')
-
-        filename = os.path.join(path, rcode, 'license.lic.txt')
-        if not os.path.exists(filename):
-            raise RuntimeError('No license information file')
-
-        with open(filename) as f:
-            info = f.read()
-
-        return info
+    def _get_license(self, args):
+        c = self._get_config()
+        n = args.get('id')
+        for p in c['licenses']:
+            if n == p['id']:
+                return c, p
+        raise RuntimeError('No license %s found' % n)
 
     def _get_path(self):
         c = self._config
         return os.path.join(c['homepath'], c['licpath'])
 
-    def _fetch_code(self):
-        filename = os.path.join(self._get_path(), self.counter_file)
-        if os.path.exists(filename):
-            with open(filename) as f:
-                n = int(f.read())
-        else:
-            n = 0
-        n += 1
-        with open(filename, 'w') as f:
-            f.write('%s' % n)
-        return 'reg-%06d' % n
+    def _config_filename(self):
+        path = self._get_path()
+        filename = os.path.join(path, self.data_file)
+        if not os.path.exists(filename):
+            if not os.path.exists(path):
+                os.makedirs(path)
+            with open(filename, 'w') as fp:
+                json.dump(dict(counter=0, licenses=[]), fp)
+        return filename
 
+    def _get_config(self):
+        with open(self._config_filename(), 'r') as fp:
+            return json.load(fp)
+
+    def _set_config(self, data):
+        with open(self._config_filename(), 'w') as fp:
+            return json.dump(data, fp, indent=2)
 
 if __name__ == '__main__':
     import doctest
