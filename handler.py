@@ -60,19 +60,14 @@ class RootHandler(BaseHandler):
                 if drives & 1:
                     result.append(chr(i + 65) + ':\\')
                 drives >>= 1
-            return result
+            return [(x, 1) for x in result]
 
         if not os.path.exists(path):
             raise RuntimeError('No %s found' % path)
 
-        x = args.get('filters')
-        filter_type = os.path.isdir if x == 'isdir' \
-            else os.path.isfile if x == 'isfile' \
-            else bool
-        names = [x for x in os.listdir(path) if filter_type(x)]
-
-        pattern = args.get('pattern')
-        return fnmatch.filter(names, pattern) if pattern else names
+        pattern = args.get('pattern', '*')
+        names = fnmatch.filter(os.listdir(path), pattern)
+        return [(x, os.path.isdir(os.path.join(path, x))) for x in names]
 
 
 class ProjectHandler(BaseHandler):
@@ -127,19 +122,22 @@ class ProjectHandler(BaseHandler):
                 break
             n += 1
 
-        cmd_args = ['init', '--src', path, path]
+        cmd_args = ['init', '--src', args.get('src', path), path]
         call_pyarmor(cmd_args)
 
-        project = {
-            'id': n,
-            'name': name,
-            'title': args.get('title', name),
-        }
+        project = Project()
+        project.open(path)
+        project._update(args)
+        project.save(path)
 
+        project['id'] = n
+        project.setdefault('name', name)
+        project.setdefault('title', name)
         c['projects'].append(project)
         c['counter'] = n
         self._set_config(c)
 
+        logging.info('Create project: %s', project)
         return project
 
     def do_update(self, args):
@@ -153,6 +151,7 @@ class ProjectHandler(BaseHandler):
         project._update(args)
         project.save(path)
 
+        logging.info('Update project: %s', p)
         return p
 
     def do_list(self, args):
@@ -168,6 +167,8 @@ class ProjectHandler(BaseHandler):
             path = self._get_project_path(p)
             if os.path.exists(path):
                 shutil.rmtree(path)
+
+        logging.info('Remove project: %s', p)
         return p
 
     def do_build(self, args):
@@ -185,6 +186,26 @@ class ProjectHandler(BaseHandler):
         call_pyarmor(cmd_args)
 
         return output if output else os.path.join(path, 'dist')
+
+    def do_runtime(self, args):
+        options = 'platform', 'package_runtime', 'enable_suffix', \
+                   'with_license'
+
+        cmd_args = ['runtime']
+        output = args.get('output', self._get_path())
+        cmd_args.extend(['--output', output])
+
+        for x in options:
+            if x in args:
+                cmd_args.append('--%s' % x.replace('_', '-'))
+                v = args.get(x)
+                if v:
+                    cmd_args.append(v)
+
+        logging.info('Generate runtime package at %s', output)
+        call_pyarmor(cmd_args)
+
+        return output
 
     def _get_project(self, args):
         c = self._get_config()
