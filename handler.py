@@ -292,7 +292,7 @@ class LicenseHandler(BaseHandler):
 
         rcode = args.get('rcode')
         if not rcode:
-            rcode = self.template % n
+            args['rcode'] = rcode = self.template % n
         cmd_args.append(rcode)
         call_pyarmor(cmd_args)
 
