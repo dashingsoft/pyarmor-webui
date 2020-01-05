@@ -69,11 +69,21 @@ class RootHandler(BaseHandler):
         if not os.path.exists(path):
             raise RuntimeError('No %s found' % path)
 
+        dirs = []
+        files = []
         pattern = args.get('pattern', '*')
-        names = [(os.path.isfile(x), os.path.basename(x).replace('\\', '/'))
-                 for x in glob.glob(os.path.join(path, pattern))]
-        names.sort(key=lambda x: '%s%s' % (x[0], x[1].lower()))
-        return names
+        for x in glob.glob(os.path.join(path, pattern)):
+            if os.path.isdir(x):
+                dirs.append(os.path.basename(x).replace('\\', '/'))
+            else:
+                files.append(os.path.basename(x).replace('\\', '/'))
+        dirs.sort(key=str.lower)
+        files.sort(key=str.lower)
+        return {
+            'path': path.replace('\\', '/').split('/'),
+            'dirs': dirs,
+            'files': files,
+        }
 
 
 class ProjectHandler(BaseHandler):
