@@ -80,7 +80,7 @@ class RootHandler(BaseHandler):
         dirs.sort(key=str.lower)
         files.sort(key=str.lower)
         return {
-            'path': path.replace('\\', '/').split('/').rstrip('/').split('/'),
+            'path': path.replace('\\', '/').rstrip('/').split('/'),
             'dirs': dirs,
             'files': files,
         }
