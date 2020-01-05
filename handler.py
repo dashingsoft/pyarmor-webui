@@ -176,8 +176,6 @@ class ProjectHandler(BaseHandler):
 
     def do_remove(self, args):
         c, p = self._get_project(args)
-        c['projects'].remove(p)
-        self._set_config(c)
 
         if args.get('clean'):
             path = self._get_project_path(p)
@@ -185,6 +183,9 @@ class ProjectHandler(BaseHandler):
                 shutil.rmtree(path)
 
         logging.info('Remove project: %s', p)
+        c['projects'].remove(p)
+        self._set_config(c)
+
         return p
 
     def do_build(self, args):
@@ -269,6 +270,7 @@ class LicenseHandler(BaseHandler):
         'extra_data': '--bind-data',
         'disable_restrict_mode': '--disable-restrict-mode',
     }
+    switch_option_names = 'disable_restrict_mode',
 
     def __init__(self, config):
         super().__init__(config)
@@ -277,40 +279,57 @@ class LicenseHandler(BaseHandler):
     def do_new(self, args):
         c = self._get_config()
         n = c['counter'] + 1
-
-        path = self._get_path()
-        output = args.get('output', path)
-        cmd_args = ['licenses', '--output', output]
-
-        for name, opt in self.options.items():
-            if name in args:
-                v = args.get(name)
-                if v:
-                    cmd_args.append(opt)
-                    if name not in ['disable_restrict_mode']:
-                        cmd_args.append(v)
-
         rcode = args.get('rcode')
         if not rcode:
             args['rcode'] = rcode = self.template % n
-        cmd_args.append(rcode)
-        call_pyarmor(cmd_args)
-
         args['id'] = n
         args.setdefault('rcode', rcode)
         c['licenses'].append(args)
         c['counter'] = n
         self._set_config(c)
 
+        self._create(args)
         return args
+
+    def _create(self, args, update=False):
+        path = self._get_path()
+        output = args.get('output', path)
+
+        rcode = args['rcode']
+        if os.path.exists(os.path.join(output, rcode)) and not update:
+            raise RuntimeError('The license "%s" has been exists' % rcode)
+
+        cmd_args = ['licenses', '--output', output]
+        for name, opt in self.options.items():
+            if name in args:
+                v = args.get(name)
+                if v:
+                    cmd_args.append(opt)
+                    if name not in self.switch_option_names:
+                        cmd_args.append(v)
+        cmd_args.append(rcode)
+
+        call_pyarmor(cmd_args)
+
+    def do_update(self, args):
+        c, p = self._get_license(args)
+        p.update(args)
+        self._set_config(c)
+
+        self._create(args, update=True)
+        return p
 
     def do_remove(self, args):
         c, p = self._get_license(args)
+
         path = self._get_path()
         rcode = p['rcode']
         licpath = os.path.join(path, rcode)
         if os.path.exists(licpath):
             shutil.rmtree(licpath)
+
+        c['licenses'].remove(p)
+        self._set_config(c)
         return p
 
     def do_list(self, args=None):
@@ -320,8 +339,9 @@ class LicenseHandler(BaseHandler):
     def _get_license(self, args):
         c = self._get_config()
         n = args.get('id')
+        r = args.get('rcode')
         for p in c['licenses']:
-            if n == p['id']:
+            if n == p['id'] and r == p['rcode']:
                 return c, p
         raise RuntimeError('No license %s found' % n)
 
