@@ -51,17 +51,21 @@ class RootHandler(BaseHandler):
         }
 
     def do_listdir(self, args):
-        path = os.path.normpath(os.path.expandvars(args.get('path', '/')))
-        if path == '/' and sys.platform == 'win32':
-            from ctypes import cdll
-            drives = cdll.kernel32.GetLogicalDrives()
-            result = []
-            for i in range(26):
-                if drives & 1:
-                    result.append(chr(i + 65) + ':\\')
-                drives >>= 1
-            return [(x, 1) for x in result]
+        path = os.path.expandvars(args.get('path', '/'))
+        if sys.platform == 'win32':
+            if path == '/':
+                from ctypes import cdll
+                drives = cdll.kernel32.GetLogicalDrives()
+                result = []
+                for i in range(26):
+                    if drives & 1:
+                        result.append(chr(i + 65) + ':\\')
+                    drives >>= 1
+                return [(x, 1) for x in result]
+            if path[0] == '/':
+                path = path[1:]
 
+        path = os.path.normpath(path)
         if not os.path.exists(path):
             raise RuntimeError('No %s found' % path)
 
