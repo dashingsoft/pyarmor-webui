@@ -284,13 +284,14 @@ class LicenseHandler(BaseHandler):
 
         for name, opt in self.options.items():
             if name in args:
-                cmd_args.append(opt)
                 v = args.get(name)
                 if v:
-                    cmd_args.append(v)
+                    cmd_args.append(opt)
+                    if name not in ['disable_restrict_mode']:
+                        cmd_args.append(v)
 
         rcode = args.get('rcode')
-        if rcode is None:
+        if not rcode:
             rcode = self.template % n
         cmd_args.append(rcode)
         call_pyarmor(cmd_args)
