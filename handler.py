@@ -68,7 +68,7 @@ class RootHandler(BaseHandler):
         pattern = args.get('pattern', '*')
         names = [(os.path.isfile(x), os.path.basename(x).replace('\\', '/'))
                  for x in glob.glob(os.path.join(path, pattern))]
-        names.sort(key=str.lower)
+        names.sort(key=lambda x: '%s%s' % (x[0], x[1].lower()))
         return names
 
 
