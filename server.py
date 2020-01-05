@@ -50,7 +50,7 @@ class HelperHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Serve a POST request."""
-        t = self.headers.get('Content-Type', 'application/json;charset=UTF-8')
+        t = self.headers.get('Content-Type')
         self.log_message("Content-Type: %s", t)
 
         n = int(self.headers.get('Content-Length', 0))
