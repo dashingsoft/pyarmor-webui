@@ -1,4 +1,4 @@
-import fnmatch
+import glob
 import logging
 import json
 import os
@@ -51,7 +51,7 @@ class RootHandler(BaseHandler):
         }
 
     def do_listdir(self, args):
-        path = os.path.expandvars(args.get('path', '/'))
+        path = os.path.normpath(os.path.expandvars(args.get('path', '/')))
         if path == '/' and sys.platform == 'win32':
             from ctypes import cdll
             drives = cdll.kernel32.GetLogicalDrives()
@@ -66,8 +66,10 @@ class RootHandler(BaseHandler):
             raise RuntimeError('No %s found' % path)
 
         pattern = args.get('pattern', '*')
-        names = fnmatch.filter(os.listdir(path), pattern)
-        return [(x, os.path.isdir(os.path.join(path, x))) for x in names]
+        names = [(os.path.isfile(x), os.path.basename(x).replace('\\', '/'))
+                 for x in glob.glob(os.path.join(path, pattern))]
+        names.sort(key=str.lower)
+        return names
 
 
 class ProjectHandler(BaseHandler):
