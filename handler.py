@@ -5,6 +5,8 @@ import os
 import shutil
 import sys
 
+from fnmatch import fnmatch
+
 from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
                              get_registration_code, query_keyinfo,
                              version as pyarmor_version)
@@ -71,11 +73,11 @@ class RootHandler(BaseHandler):
 
         dirs = []
         files = []
-        pattern = args.get('pattern', '*')
-        for x in glob.glob(os.path.join(path, pattern)):
+        pat = args.get('pattern', '*')
+        for x in glob.glob(os.path.join(path, '*')):
             if os.path.isdir(x):
                 dirs.append(os.path.basename(x).replace('\\', '/'))
-            else:
+            elif pat == '*' or fnmatch(os.path.basename(x), pat):
                 files.append(os.path.basename(x).replace('\\', '/'))
         dirs.sort(key=str.lower)
         files.sort(key=str.lower)
