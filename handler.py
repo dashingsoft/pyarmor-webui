@@ -296,7 +296,7 @@ class LicenseHandler(BaseHandler):
         output = args.get('output', path)
 
         rcode = args['rcode']
-        filename = os.path.join(output, rcode)
+        filename = os.path.join(output, rcode, 'license.lic')
         if os.path.exists(filename) and not update:
             raise RuntimeError('The license "%s" has been exists' % rcode)
 
