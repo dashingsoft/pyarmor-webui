@@ -288,7 +288,7 @@ class LicenseHandler(BaseHandler):
         c['counter'] = n
         self._set_config(c)
 
-        self._create(args)
+        args['filename'] = self._create(args)
         return args
 
     def _create(self, args, update=False):
@@ -296,7 +296,8 @@ class LicenseHandler(BaseHandler):
         output = args.get('output', path)
 
         rcode = args['rcode']
-        if os.path.exists(os.path.join(output, rcode)) and not update:
+        filename = os.path.join(output, rcode)
+        if os.path.exists(filename) and not update:
             raise RuntimeError('The license "%s" has been exists' % rcode)
 
         cmd_args = ['licenses', '--output', output]
@@ -310,6 +311,7 @@ class LicenseHandler(BaseHandler):
         cmd_args.append(rcode)
 
         call_pyarmor(cmd_args)
+        return filename
 
     def do_update(self, args):
         c, p = self._get_license(args)
