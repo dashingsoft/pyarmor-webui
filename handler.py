@@ -70,7 +70,7 @@ class RootHandler(BaseHandler):
         if path == '@':
             return {
                 'path': path,
-                'dirs': ['/', os.path.expandvars('~')],
+                'dirs': ['/', os.path.expanduser('~')],
                 'files': []
             }
 
