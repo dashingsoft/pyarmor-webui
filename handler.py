@@ -67,6 +67,13 @@ class RootHandler(BaseHandler):
             if path[0] == '/':
                 path = path[1:]
 
+        if path == '@':
+            return {
+                'path': path,
+                'dirs': ['/', os.path.expandvars('~')],
+                'files': []
+            }
+
         path = os.path.normpath(path)
         if not os.path.exists(path):
             raise RuntimeError('No %s found' % path)
@@ -82,7 +89,7 @@ class RootHandler(BaseHandler):
         dirs.sort(key=str.lower)
         files.sort(key=str.lower)
         return {
-            'path': path.replace('\\', '/').rstrip('/').split('/'),
+            'path': os.path.abspath(path.replace('\\', '/').rstrip('/')),
             'dirs': dirs,
             'files': files,
         }
