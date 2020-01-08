@@ -123,7 +123,7 @@ class ProjectHandler(BaseHandler):
         manifest = []
         include = get('include')
         if include == 'exact':
-            manifest.append('include ' + entry.join(' '))
+            manifest.append('include ' + ' '.join(entry))
         elif include == 'normal':
             manifest.append('include *.py')
         elif include == 'recursive':
@@ -134,8 +134,8 @@ class ProjectHandler(BaseHandler):
 
         data = {
             'src': src,
-            'manifest': manifest.join(','),
-            'entry': entry.join(','),
+            'manifest': ','.join(manifest),
+            'entry': ','.join(entry),
             'cross_protection': cross_protection,
             'bootstrap_code': bootstrap_code,
             'restrict_mode': get('restrictMode', 2),
