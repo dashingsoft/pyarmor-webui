@@ -116,43 +116,62 @@ class ProjectHandler(BaseHandler):
             return v if not a else a
 
         entry = get('entry', [])
-        entryModes = get('entryMode', [])
-        cross_protection = 0 if 'no-cross-protection' in entryModes else 0
-        bootstrap_code = 0 if 'no-bootstrap-code' in entryModes else 0
-
         manifest = []
         include = get('include')
         if include == 'exact':
-            manifest.append('include ' + ' '.join(entry))
+            if entry:
+                manifest.append('include ' + ' '.join(entry))
         elif include == 'normal':
             manifest.append('include *.py')
         elif include == 'recursive':
             manifest.append('global-include *.py')
-
         for x in get('exclude', []):
             manifest.append('exclude ' + x)
 
+        pkg = get('packageRuntime', 1)
         data = {
             'src': src,
             'manifest': ','.join(manifest),
             'entry': ','.join(entry),
-            'cross_protection': cross_protection,
-            'bootstrap_code': bootstrap_code,
+            'cross_protection': 1 if get('crossProtection') else 0,
+            'bootstrap_code': 1 if get('bootstrapCode') else 0,
             'restrict_mode': get('restrictMode', 2),
             'obf_mode': 1 if get('obfMod') else 0,
             'obf_code': 1 if get('obfCode') else 0,
             'wrap_mode': 1 if get('wrapMode') else 0,
             'advanced_mode': 1 if get('advancedMode') else 0,
             'runtime_path': get('runtimePath'),
-            'license': get('licenseFile'),
-            'target': get('target'),
+            'license_file': get('licenseFile'),
             'enable_suffix': 1 if get('enableSuffix') else 0,
-            'is_package': 1 if get('isPackage') else 0,
-            'package_runtime': get('packageRuntime', 1),
+            'package_runtime': 1 if pkg == -1 else pkg,
         }
+
         for k in ('name', 'title', 'output', 'platform', 'plugins'):
             data[k] = get(k)
+
         return data
+
+    def _build_target(self, path, args):
+        target = args.get('buildTarget')
+        if target == 'pack':
+            cmd_args = ['pack']
+            if args.get('pack'):
+                cmd_args.append('--xoptions')
+                cmd_args.append(args.get('pack'))
+        else:
+            cmd_args = ['build']
+            if args.get('packageRuntime') == -1:
+                cmd_args.append('--no-runtime')
+
+        output = args.get('output')
+        if not output:
+            output = os.path.join(path, 'dist')
+        cmd_args.extend(['--output', output])
+
+        cmd_args.append(path)
+        call_pyarmor(cmd_args)
+
+        return output
 
     def do_build_temp(self, args):
         data = self._check_args(args)
@@ -173,18 +192,7 @@ class ProjectHandler(BaseHandler):
         project._update(data)
         project.save(path)
 
-        cmd_args = ['build']
-        target = args.get('target')
-        if target:
-            cmd_args.extend(['--target', target])
-        output = args.get('output')
-        if output:
-            cmd_args.extend(['--output', output])
-
-        cmd_args.append(path)
-        call_pyarmor(cmd_args)
-
-        return output if output else os.path.join(path, 'dist')
+        return self._build_target(path, args)
 
     def do_new(self, args):
         c = self._get_config()
@@ -258,21 +266,11 @@ class ProjectHandler(BaseHandler):
         c, p = self._get_project(args)
         path = self._get_project_path(p)
 
-        cmd_args = ['build']
-        target = args.get('traget')
-        if target:
-            cmd_args.extend(['--target', target])
-        output = args.get('output')
-        if output:
-            cmd_args.extend(['--output', output])
-        cmd_args.append(path)
-        call_pyarmor(cmd_args)
-
-        return output if output else os.path.join(path, 'dist')
+        return self._build_target(path, args)
 
     def do_runtime(self, args):
-        options = 'platform', 'package_runtime', 'enable_suffix', \
-                   'with_license'
+        options = ('platform', 'package_runtime', 'enable_suffix',
+                   'with_license')
 
         cmd_args = ['runtime']
         output = args.get('output', self._get_path())
