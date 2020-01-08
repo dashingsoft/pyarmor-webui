@@ -165,7 +165,7 @@ class ProjectHandler(BaseHandler):
 
         output = args.get('output')
         if not output:
-            output = os.path.join(path, 'dist')
+            output = os.path.join(args.get('src'), 'dist')
         cmd_args.extend(['--output', output])
 
         cmd_args.append(path)
