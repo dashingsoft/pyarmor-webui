@@ -104,7 +104,59 @@ class ProjectHandler(BaseHandler):
         super().__init__(config)
         self.name = 'project'
 
+    def _check_args(self, args):
+        src = args.get('src')
+        if not src:
+            raise RuntimeError('No project src')
+        elif not os.path.exists(src):
+            raise RuntimeError('The project src %s does not exists' % src)
+
+        def get(x, v=None):
+            a = args.get(x)
+            return v if not a else a
+
+        entry = get('entry', [])
+        entryModes = get('entryMode', [])
+        cross_protection = 0 if 'no-cross-protection' in entryModes else 0
+        bootstrap_code = 0 if 'no-bootstrap-code' in entryModes else 0
+
+        manifest = []
+        include = get('include')
+        if include == 'exact':
+            manifest.append('include ' + entry.join(' '))
+        elif include == 'normal':
+            manifest.append('include *.py')
+        elif include == 'recursive':
+            manifest.append('global-include *.py')
+
+        for x in get('exclude', []):
+            manifest.append('exclude ' + x)
+
+        data = {
+            'src': src,
+            'manifest': manifest.join(','),
+            'entry': entry.join(','),
+            'cross_protection': cross_protection,
+            'bootstrap_code': bootstrap_code,
+            'restrict_mode': get('restrictMode', 2),
+            'obf_mode': 1 if get('obfMod') else 0,
+            'obf_code': 1 if get('obfCode') else 0,
+            'wrap_mode': 1 if get('wrapMode') else 0,
+            'advanced_mode': 1 if get('advancedMode') else 0,
+            'runtime_path': get('runtimePath'),
+            'license': get('licenseFile'),
+            'target': get('target'),
+            'enable_suffix': 1 if get('enableSuffix') else 0,
+            'is_package': 1 if get('isPackage') else 0,
+            'package_runtime': get('packageRuntime', 1),
+        }
+        for k in ('name', 'title', 'output', 'platform', 'plugins'):
+            data[k] = get(k)
+        return data
+
     def do_build_temp(self, args):
+        data = self._check_args(args)
+
         name = 'project-%s' % self.temp_id
         path = os.path.join(self._get_path(), name)
 
@@ -112,17 +164,17 @@ class ProjectHandler(BaseHandler):
             shutil.rmtree(path)
         os.mkdir(path)
 
-        cmd_args = ['init', '--src', path, path]
+        cmd_args = ['init', '--src', data['src'], path]
         call_pyarmor(cmd_args)
 
         project = Project()
         project.open(path)
 
-        project._update(args)
+        project._update(data)
         project.save(path)
 
         cmd_args = ['build']
-        target = args.get('build_target')
+        target = args.get('target')
         if target:
             cmd_args.extend(['--target', target])
         output = args.get('output')
@@ -147,25 +199,30 @@ class ProjectHandler(BaseHandler):
                 break
             n += 1
 
-        cmd_args = ['init', '--src', args.get('src', path), path]
+        args['id'] = n
+        args['name'] = name
+        if not args.get('title', ''):
+            args['title'] = os.path.basename(args.get('src'))
+        data = self._check_args(args)
+
+        cmd_args = ['init', '--src', data['src'], path]
         call_pyarmor(cmd_args)
 
         project = Project()
         project.open(path)
-        project._update(args)
+        project._update(data)
         project.save(path)
 
-        project['id'] = n
-        project.setdefault('name', name)
-        project.setdefault('title', name)
-        c['projects'].append(project)
+        c['projects'].append(args)
         c['counter'] = n
         self._set_config(c)
 
-        logging.info('Create project: %s', project)
-        return project
+        logging.info('Create project: %s', args)
+        return args
 
     def do_update(self, args):
+        data = self._check_args(args)
+
         c, p = self._get_project(args)
         p.update(args)
         self._set_config(c)
@@ -173,7 +230,7 @@ class ProjectHandler(BaseHandler):
         path = self._get_project_path(p)
         project = Project()
         project.open(path)
-        project._update(args)
+        project._update(data)
         project.save(path)
 
         logging.info('Update project: %s', p)
@@ -202,7 +259,7 @@ class ProjectHandler(BaseHandler):
         path = self._get_project_path(p)
 
         cmd_args = ['build']
-        target = args.get('build_traget')
+        target = args.get('traget')
         if target:
             cmd_args.extend(['--target', target])
         output = args.get('output')
