@@ -126,7 +126,8 @@ class ProjectHandler(BaseHandler):
         elif include == 'recursive':
             manifest.append('global-include *.py')
         for x in get('exclude', []):
-            manifest.append('exclude ' + x)
+            cmd = 'exclude' if x.endswith('.py') else 'prune'
+            manifest.append('%s %s' % (cmd, x))
 
         pkg = get('packageRuntime', 1)
         data = {
