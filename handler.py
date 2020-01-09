@@ -72,7 +72,7 @@ class DirectoryHandler(BaseHandler):
         if not os.path.exists(args):
             raise RuntimeError('This path %s does not exists' % args)
         if args not in ['/']:
-            os.remove(args)
+            os.rmdir(args)
         return args
 
     def do_list(self, args):
