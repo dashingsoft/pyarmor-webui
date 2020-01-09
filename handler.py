@@ -235,6 +235,7 @@ class ProjectHandler(BaseHandler):
 
         args['id'] = n
         args['name'] = name
+        args['path'] = path
         if not args.get('title', ''):
             args['title'] = os.path.basename(args.get('src'))
         data = self._check_args(args)
