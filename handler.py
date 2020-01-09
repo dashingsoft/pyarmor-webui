@@ -166,6 +166,8 @@ class ProjectHandler(BaseHandler):
         output = args.get('output')
         if not output:
             output = os.path.join(args.get('src'), 'dist')
+        if args.get('packageName'):
+            output = os.path.join(output, args.get('packageName'))
         cmd_args.extend(['--output', output])
 
         cmd_args.append(path)
@@ -346,13 +348,14 @@ class LicenseHandler(BaseHandler):
         rcode = args.get('rcode')
         if not rcode:
             args['rcode'] = rcode = self.template % n
+
+        args['filename'] = self._create(args)
+
         args['id'] = n
-        args.setdefault('rcode', rcode)
         c['licenses'].append(args)
         c['counter'] = n
         self._set_config(c)
 
-        args['filename'] = self._create(args)
         return args
 
     def _create(self, args, update=False):
