@@ -41,7 +41,11 @@ class RootHandler(BaseHandler):
 
     def __init__(self, config):
         super().__init__(config)
-        self.children.extend([ProjectHandler(config), LicenseHandler(config)])
+        self.children.extend([
+            ProjectHandler(config),
+            LicenseHandler(config),
+            DirectoryHandler(config)
+        ])
 
     def do_version(self, args=None):
         pytransform_bootstrap()
@@ -52,7 +56,26 @@ class RootHandler(BaseHandler):
             'info': query_keyinfo(rcode) if rcode else ''
         }
 
-    def do_listdir(self, args):
+
+class DirectoryHandler(BaseHandler):
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.name = 'directory'
+
+    def do_new(self, args):
+        if not os.path.exists(args):
+            os.makedirs(args)
+        return args
+
+    def do_remove(self, args):
+        if not os.path.exists(args):
+            raise RuntimeError('This path %s does not exists' % args)
+        if args not in ['/']:
+            os.remove(args)
+        return args
+
+    def do_list(self, args):
         path = os.path.expandvars(args.get('path', '/'))
         if sys.platform == 'win32':
             if path == '/':
