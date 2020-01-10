@@ -182,6 +182,8 @@ class ProjectHandler(BaseHandler):
             if args.get('pack'):
                 cmd_args.append('--xoptions')
                 cmd_args.append(args.get('pack'))
+            if args.get('licenseFile') == 'false':
+                cmd_args.append('--without-license')
         else:
             cmd_args = ['build']
             if args.get('packageRuntime') == -1:
