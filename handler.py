@@ -152,6 +152,10 @@ class ProjectHandler(BaseHandler):
             cmd = 'exclude' if x.endswith('.py') else 'prune'
             manifest.append('%s %s' % (cmd, x))
 
+        licfile = get('licenseFile')
+        if licfile and not licfile.endswith('license.lic'):
+            licfile = None
+
         pkg = get('packageRuntime', 1)
         data = {
             'src': src,
@@ -164,8 +168,7 @@ class ProjectHandler(BaseHandler):
             'obf_code': 1 if get('obfCode') else 0,
             'wrap_mode': 1 if get('wrapMode') else 0,
             'advanced_mode': 1 if get('advancedMode') else 0,
-            'runtime_path': get('runtimePath'),
-            'license_file': get('licenseFile'),
+            'license_file': licfile,
             'enable_suffix': 1 if get('enableSuffix') else 0,
             'package_runtime': 1 if pkg == -1 else pkg,
         }
@@ -182,7 +185,7 @@ class ProjectHandler(BaseHandler):
             if args.get('pack'):
                 cmd_args.append('--xoptions')
                 cmd_args.append(args.get('pack'))
-            if args.get('licenseFile') == 'false':
+            if args.get('licenseFile') in (0, '0', False, 'false'):
                 cmd_args.append('--without-license')
         else:
             cmd_args = ['build']
