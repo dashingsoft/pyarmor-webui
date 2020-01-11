@@ -239,14 +239,21 @@ class ProjectHandler(BaseHandler):
         target = args.get('buildTarget')
         self._check_arg('target', target, valids=['pack', 'obf'])
 
+        name = args.get('bundleName')
+        output = args.get('output')
+        if not output:
+            output = os.path.join(args.get('src'), 'dist')
+
         if target == 'pack':
             cmd_args = ['pack']
-            xoptions = args.get('pack')
+            xoptions = args.get('pack', [])
+            self._check_arg('pack', xoptions, types=list)
             if xoptions:
-                self._check_arg('pack', xoptions, types=list)
                 cmd_args.append('--xoptions')
                 cmd_args.append(' '.join([x if x.starswith('-') else quote(x)
                                           for x in xoptions]))
+            if name:
+                cmd_args.extend(['--name', name])
             if args.get('licenseFile') == 'false':
                 cmd_args.append('--without-license')
         else:
@@ -254,11 +261,8 @@ class ProjectHandler(BaseHandler):
             if args.get('packageRuntime') == -1:
                 cmd_args.append('--no-runtime')
 
-        output = args.get('output')
-        if not output:
-            output = os.path.join(args.get('src'), 'dist')
-        if args.get('packageName'):
-            output = os.path.join(output, args.get('packageName'))
+            if name:
+                output = os.path.join(output, name)
         cmd_args.extend(['--output', output])
 
         cmd_args.append(path)
