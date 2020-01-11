@@ -28,10 +28,9 @@ except Exception:
 __version__ = '0.1'
 
 __config__ = {
+    'version': __version__,
     'basepath': os.path.dirname(__file__),
     'homepath': os.path.expanduser(os.path.join('~', '.pyarmor')),
-    'propath': 'projects',
-    'licpath': 'licenses',
 }
 
 

@@ -6,6 +6,7 @@ import shutil
 import sys
 
 from fnmatch import fnmatch
+from shlex import quote
 
 from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
                              get_registration_code, query_keyinfo,
@@ -18,6 +19,8 @@ def call_pyarmor(args):
 
 
 class BaseHandler():
+
+    data_file = 'index.json'
 
     def __init__(self, config):
         self._config = config
@@ -36,6 +39,44 @@ class BaseHandler():
                     return handler.dispatch(path[i+1:], args)
             raise RuntimeError('No route for %s', name)
 
+    def _check_arg(self, name, value, valids=None, invalids=None, types=None):
+        if value in (None, ''):
+            raise RuntimeError('Missing argument "%s"' % name)
+        if valids is not None and value not in valids:
+            raise RuntimeError('Invalid argument "%s"' % name)
+        if invalids is not None and value in invalids:
+            raise RuntimeError('Invalid argument "%s"' % name)
+        if types is not None and isinstance(value, types):
+            raise RuntimeError('Invalid argument "%s"' % name)
+
+    def _check_path(self, path):
+        if not os.path.exists(path):
+            raise RuntimeError('This path %s does not exists' % path)
+
+    def _get_path(self):
+        c = self._config
+        return os.path.join(c['homepath'], self.name + 's')
+
+    def _config_filename(self):
+        path = self._get_path()
+        filename = os.path.join(path, self.data_file)
+        if not os.path.exists(filename):
+            if not os.path.exists(path):
+                os.makedirs(path)
+            data = dict(counter=0)
+            data[self.name + 's'] = []
+            with open(filename, 'w') as fp:
+                json.dump(data, fp)
+        return filename
+
+    def _get_config(self):
+        with open(self._config_filename(), 'r') as fp:
+            return json.load(fp)
+
+    def _set_config(self, data):
+        with open(self._config_filename(), 'w') as fp:
+            return json.dump(data, fp, indent=2)
+
 
 class RootHandler(BaseHandler):
 
@@ -44,7 +85,8 @@ class RootHandler(BaseHandler):
         self.children.extend([
             ProjectHandler(config),
             LicenseHandler(config),
-            DirectoryHandler(config)
+            DirectoryHandler(config),
+            RuntimeHandler(config)
         ])
 
     def do_version(self, args=None):
@@ -52,8 +94,10 @@ class RootHandler(BaseHandler):
         rcode = get_registration_code()
         return {
             'version': pyarmor_version,
-            'rcode': rcode if rcode else '',
-            'info': query_keyinfo(rcode) if rcode else ''
+            'regcode': rcode if rcode else '',
+            'reginfo': query_keyinfo(rcode) if rcode else '',
+            'server': self._config['version'],
+            'python': '.'.join(sys.version_info[:3])
         }
 
 
@@ -64,16 +108,18 @@ class DirectoryHandler(BaseHandler):
         self.name = 'directory'
 
     def do_new(self, args):
+        self._check_arg('path', args)
+
         if not os.path.exists(args):
             os.makedirs(args)
-        return args
+        return os.path.abspath(args)
 
     def do_remove(self, args):
-        if not os.path.exists(args):
-            raise RuntimeError('This path %s does not exists' % args)
-        if args not in ['/']:
-            os.rmdir(args)
-        return args
+        self._check_arg('path', args, invalids=['.', '/'])
+        self._check_path(args)
+
+        os.rmdir(args)
+        return os.path.abspath(args)
 
     def do_list(self, args):
         path = os.path.expandvars(args.get('path', '/'))
@@ -127,20 +173,30 @@ class ProjectHandler(BaseHandler):
         super().__init__(config)
         self.name = 'project'
 
-    def _check_args(self, args):
+    def _build_data(self, args):
         src = args.get('src')
-        if not src:
-            raise RuntimeError('No project src')
-        elif not os.path.exists(src):
-            raise RuntimeError('The project src %s does not exists' % src)
+        self._check_arg('src', src, types=str)
+        self._check_path(src)
 
-        def get(x, v=None):
-            a = args.get(x)
-            return v if not a else a
+        entry = args.get('entry', [])
+        self._check_arg('entry', entry, types=list)
 
-        entry = get('entry', [])
+        include = args.get('include')
+        self._check_arg('include', include,
+                        valids=['exact', 'normal', 'recursive'])
+
+        exclude = args.get('exclude', [])
+        self._check_arg('exclude', exclude, types=list)
+
+        licfile = args.get('licenseFile')
+        self._check_arg('license', licfile, types=str)
+
+        pkgmode = args.get('packageRuntime')
+        self._check_arg('Runtime Files', pkgmode, valids=[-1, 0, 1])
+        if pkgmode == -1:
+            pkgmode = 1
+
         manifest = []
-        include = get('include')
         if include == 'exact':
             if entry:
                 manifest.append('include ' + ' '.join(entry))
@@ -148,44 +204,50 @@ class ProjectHandler(BaseHandler):
             manifest.append('include *.py')
         elif include == 'recursive':
             manifest.append('global-include *.py')
-        for x in get('exclude', []):
+        for x in exclude:
             cmd = 'exclude' if x.endswith('.py') else 'prune'
             manifest.append('%s %s' % (cmd, x))
 
-        licfile = get('licenseFile')
         if licfile and not licfile.endswith('license.lic'):
             licfile = None
 
-        pkg = get('packageRuntime', 1)
+        def get_bool(x, v=0):
+            return 1 if args.get(x) else v
+
         data = {
             'src': src,
             'manifest': ','.join(manifest),
             'entry': ','.join(entry),
-            'cross_protection': 1 if get('crossProtection') else 0,
-            'bootstrap_code': 1 if get('bootstrapCode') else 0,
-            'restrict_mode': get('restrictMode', 2),
-            'obf_mode': 1 if get('obfMod') else 0,
-            'obf_code': 1 if get('obfCode') else 0,
-            'wrap_mode': 1 if get('wrapMode') else 0,
-            'advanced_mode': 1 if get('advancedMode') else 0,
+            'cross_protection': get_bool('crossProtection'),
+            'bootstrap_code': get_bool('bootstrapCode'),
+            'restrict_mode': get_bool('restrictMode', 2),
+            'obf_mode': get_bool('obfMod'),
+            'obf_code': get_bool('obfCode'),
+            'wrap_mode': get_bool('wrapMode'),
+            'advanced_mode': get_bool('advancedMode'),
+            'enable_suffix': get_bool('enableSuffix'),
             'license_file': licfile,
-            'enable_suffix': 1 if get('enableSuffix') else 0,
-            'package_runtime': 1 if pkg == -1 else pkg,
+            'package_runtime': pkgmode,
         }
 
         for k in ('name', 'title', 'output', 'platform', 'plugins'):
-            data[k] = get(k)
+            data[k] = args.get(k)
 
         return data
 
     def _build_target(self, path, args):
         target = args.get('buildTarget')
+        self._check_arg('target', target, valids=['pack', 'obf'])
+
         if target == 'pack':
             cmd_args = ['pack']
-            if args.get('pack'):
+            xoptions = args.get('pack')
+            if xoptions:
+                self._check_arg('pack', xoptions, types=list)
                 cmd_args.append('--xoptions')
-                cmd_args.append(args.get('pack'))
-            if args.get('licenseFile') in (0, '0', False, 'false'):
+                cmd_args.append(' '.join([x if x.starswith('-') else quote(x)
+                                          for x in xoptions]))
+            if args.get('licenseFile') == 'false':
                 cmd_args.append('--without-license')
         else:
             cmd_args = ['build']
@@ -205,7 +267,7 @@ class ProjectHandler(BaseHandler):
         return output
 
     def do_build_temp(self, args):
-        data = self._check_args(args)
+        data = self._build_data(args)
 
         name = 'project-%s' % self.temp_id
         path = os.path.join(self._get_path(), name)
@@ -243,7 +305,7 @@ class ProjectHandler(BaseHandler):
         args['path'] = path
         if not args.get('title', ''):
             args['title'] = os.path.basename(args.get('src'))
-        data = self._check_args(args)
+        data = self._build_data(args)
 
         cmd_args = ['init', '--src', data['src'], path]
         call_pyarmor(cmd_args)
@@ -261,7 +323,7 @@ class ProjectHandler(BaseHandler):
         return args
 
     def do_update(self, args):
-        data = self._check_args(args)
+        data = self._build_data(args)
 
         c, p = self._get_project(args)
         p.update(args)
@@ -300,26 +362,6 @@ class ProjectHandler(BaseHandler):
 
         return self._build_target(path, args)
 
-    def do_runtime(self, args):
-        options = ('platform', 'package_runtime', 'enable_suffix',
-                   'with_license')
-
-        cmd_args = ['runtime']
-        output = args.get('output', self._get_path())
-        cmd_args.extend(['--output', output])
-
-        for x in options:
-            if x in args:
-                cmd_args.append('--%s' % x.replace('_', '-'))
-                v = args.get(x)
-                if v:
-                    cmd_args.append(v)
-
-        logging.info('Generate runtime package at %s', output)
-        call_pyarmor(cmd_args)
-
-        return output
-
     def _get_project(self, args):
         c = self._get_config()
         n = args.get('id')
@@ -331,32 +373,9 @@ class ProjectHandler(BaseHandler):
     def _get_project_path(self, project):
         return os.path.join(self._get_path(), 'project-%s' % project['id'])
 
-    def _get_path(self):
-        c = self._config
-        return os.path.join(c['homepath'], c['propath'])
-
-    def _config_filename(self):
-        path = self._get_path()
-        filename = os.path.join(path, self.data_file)
-        if not os.path.exists(filename):
-            if not os.path.exists(path):
-                os.makedirs(path)
-            with open(filename, 'w') as fp:
-                json.dump(dict(counter=0, projects=[]), fp)
-        return filename
-
-    def _get_config(self):
-        with open(self._config_filename(), 'r') as fp:
-            return json.load(fp)
-
-    def _set_config(self, data):
-        with open(self._config_filename(), 'w') as fp:
-            return json.dump(data, fp, indent=2)
-
 
 class LicenseHandler(BaseHandler):
 
-    data_file = 'index.json'
     template = 'reg-%06d'
     options = {
         'harddisk': '--bind-disk',
@@ -444,27 +463,32 @@ class LicenseHandler(BaseHandler):
                 return c, p
         raise RuntimeError('No license %s found' % n)
 
-    def _get_path(self):
-        c = self._config
-        return os.path.join(c['homepath'], c['licpath'])
 
-    def _config_filename(self):
-        path = self._get_path()
-        filename = os.path.join(path, self.data_file)
-        if not os.path.exists(filename):
-            if not os.path.exists(path):
-                os.makedirs(path)
-            with open(filename, 'w') as fp:
-                json.dump(dict(counter=0, licenses=[]), fp)
-        return filename
+def RuntimeHandler(BaseHandler):
 
-    def _get_config(self):
-        with open(self._config_filename(), 'r') as fp:
-            return json.load(fp)
+    options = ('platform', 'package_runtime', 'enable_suffix', 'with_license')
 
-    def _set_config(self, data):
-        with open(self._config_filename(), 'w') as fp:
-            return json.dump(data, fp, indent=2)
+    def __init__(self, config):
+        super().__init__(config)
+        self.name = 'runtime'
+
+    def do_new(self, args):
+        cmd_args = ['runtime']
+        output = args.get('output', self._get_path())
+        cmd_args.extend(['--output', output])
+
+        for x in self.options:
+            if x in args:
+                cmd_args.append('--%s' % x.replace('_', '-'))
+                v = args.get(x)
+                if v:
+                    cmd_args.append(v)
+
+        logging.info('Generate runtime package at %s', output)
+        call_pyarmor(cmd_args)
+
+        return output
+
 
 if __name__ == '__main__':
     import doctest
