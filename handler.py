@@ -191,8 +191,11 @@ class ProjectHandler(BaseHandler):
         licfile = args.get('licenseFile')
         self._check_arg('license', licfile, types=str)
 
+        bootstrap = args.get('bootstrapCode')
+        self._check_arg('bootstrap code', bootstrap, valids=[0, 1, 2, 3])
+
         pkgmode = args.get('packageRuntime')
-        self._check_arg('Runtime Files', pkgmode, valids=[-1, 0, 1])
+        self._check_arg('package runtime', pkgmode, valids=[-1, 0, 1, 2, 3])
         if pkgmode == -1:
             pkgmode = 1
 
@@ -219,15 +222,14 @@ class ProjectHandler(BaseHandler):
             'manifest': ','.join(manifest),
             'entry': ','.join(entry),
             'cross_protection': get_bool('crossProtection'),
-            'bootstrap_code': get_bool('bootstrapCode'),
             'restrict_mode': get_bool('restrictMode', 2),
             'obf_mode': get_bool('obfMod'),
             'obf_code': get_bool('obfCode'),
             'wrap_mode': get_bool('wrapMode'),
             'advanced_mode': get_bool('advancedMode'),
-            'enable_suffix': get_bool('enableSuffix'),
             'license_file': licfile,
             'package_runtime': pkgmode,
+            'bootstrap_code': bootstrap,
         }
 
         for k in ('name', 'title', 'output', 'platform', 'plugins'):
