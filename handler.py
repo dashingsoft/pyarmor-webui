@@ -97,7 +97,7 @@ class RootHandler(BaseHandler):
             'regcode': rcode if rcode else '',
             'reginfo': query_keyinfo(rcode) if rcode else '',
             'server': self._config['version'],
-            'python': '.'.join(sys.version_info[:3])
+            'python': '%s.%s.%s' % sys.version_info[:3]
         }
 
 
