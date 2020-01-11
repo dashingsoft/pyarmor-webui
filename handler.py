@@ -237,24 +237,30 @@ class ProjectHandler(BaseHandler):
 
     def _build_target(self, path, args):
         target = args.get('buildTarget')
-        self._check_arg('target', target, valids=['pack', 'obf'])
+        self._check_arg('target', target, valids=[0, 1, 2, 3])
 
         name = args.get('bundleName')
         output = args.get('output')
         if not output:
             output = os.path.join(args.get('src'), 'dist')
 
-        if target == 'pack':
+        if target:
             cmd_args = ['pack']
             xoptions = args.get('pack', [])
             self._check_arg('pack', xoptions, types=list)
+            if target == 2:
+                xoptions.append('--onefile')
+            elif target == 3:
+                xoptions.append('--runtime-hook')
+                p = os.path.dirname(os.path.abspath(__file__))
+                xoptions.append(os.path.join(p, 'data', 'copy_license.py'))
             if xoptions:
                 cmd_args.append('--xoptions')
                 cmd_args.append(' '.join([x if x.starswith('-') else quote(x)
                                           for x in xoptions]))
             if name:
                 cmd_args.extend(['--name', name])
-            if args.get('licenseFile') == 'false':
+            if target == 3 or args.get('licenseFile') == 'false':
                 cmd_args.append('--without-license')
         else:
             cmd_args = ['build']
