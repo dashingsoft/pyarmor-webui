@@ -2,27 +2,27 @@
 
 This is a simple webserver for PyArmor WebUI.
 
-Start a web server on local port 9096 and open web browser:
+Start a web server on default port 9096 and open web browser:
 
     python server.py
 
-Start on other port 8089:
+Start on port 8089:
 
     python server.py -p 8089
 
-Start without opening web browser:
+No open web browser:
 
     python server.py -n
 
 ## API
 
-* /version
+### /version
 
 Get version information of PyArmor, Server and Python
 
 URL
 
-    http://localhost/version
+    http://localhost:9096/version
 
 Method: POST
 
@@ -32,13 +32,13 @@ Success: HTTP/1.1 200 OK
 
 Return
 
-| Name       | Type    | Required | Length | Description |
-|------------|---------|----------|--------|-------------|
-| version    | String  |    Y     |        | PyArmor version |
-| regcode    | String  |          |        | PyArmor registration code, empty for trial version |
-| reginfo    | String  |          |        | PyArmor registration name and email |
-| server     | String  |          |        | PyArmor Server version |
-| python     | String  |          |        | Python version |
+| Name       | Type    | Length | Description |
+|------------|---------|--------|-------------|
+| version    | String  |        | PyArmor version |
+| regcode    | String  |        | PyArmor registration code, empty for trial version |
+| reginfo    | String  |        | PyArmor registration name and email |
+| server     | String  |        | PyArmor Server version |
+| python     | String  |        | Python version |
 
 For example
 
@@ -50,21 +50,13 @@ For example
     "python": "3.7.0",
     }
 
-Error: HTTP/1.1 400 Bad Request
-
-For example
-
-    {
-    "username": ["A user with that username already exists."]
-    }
-
-* /directory/list
+### /directory/list
 
 List directories and files in this path
 
 URL
 
-    http://localhost/directory/list
+    http://localhost:9096/directory/list
 
 Method: POST
 
@@ -84,11 +76,11 @@ Success: HTTP/1.1 200 OK
 
 Return
 
-| Name       | Type    | Required | Length | Description |
-|------------|---------|----------|--------|-------------|
-| path       | String  |    Y     |        | Absolute path of request path |
-| dirs       | List    |    Y     |        | All the directories in this path |
-| files      | List    |    Y     |        | All the files matched the pattern in this path |
+| Name       | Type    | Length | Description |
+|------------|---------|--------|-------------|
+| path       | String  |        | Absolute path of request path |
+| dirs       | List    |        | All the directories in this path |
+| files      | List    |        | All the files matched the pattern in this path |
 
 The list of `dirs` and `files` are sorted ignore case sensitivity.
 
@@ -99,14 +91,14 @@ For example
       "dirs": [ "Desktop", "workspace" ],
       "files": []
     }
-    
-* /directory/new
+
+### /directory/new
 
 Make a directory
 
 URL
 
-    http://localhost/directory/new
+    http://localhost:9096/directory/new
 
 Method: POST
 
@@ -116,13 +108,13 @@ Success: HTTP/1.1 200 OK
 
 Return: Absolute path created
 
-* /directory/remove
+### /directory/remove
 
 Remove a directory
 
 URL
 
-    http://localhost/directory/remove
+    http://localhost:9096/directory/remove
 
 Method: POST
 
@@ -132,30 +124,30 @@ Success: HTTP/1.1 200 OK
 
 Return: Absolute path removed
 
-* /project/list
+### /project/list
 
-* /project/new
+### /project/new
 
-* /project/update
+### /project/update
 
-* /project/remove
+### /project/remove
 
-* /project/build
+### /project/build
 
-* /project/build_temp
+### /project/build_temp
 
-* /license/list
+### /license/list
 
-* /license/new
+### /license/new
 
-* /license/update
+### /license/update
 
-* /license/remove
+### /license/remove
 
-* /runtime/list
+### /runtime/list
 
-* /runtime/new
+### /runtime/new
 
-* /runtime/update
+### /runtime/update
 
-* /runtime/remove
+### /runtime/remove
