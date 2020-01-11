@@ -46,7 +46,7 @@ class BaseHandler():
             raise RuntimeError('Invalid argument "%s"' % name)
         if invalids is not None and value in invalids:
             raise RuntimeError('Invalid argument "%s"' % name)
-        if types is not None and isinstance(value, types):
+        if types is not None and not isinstance(value, types):
             raise RuntimeError('Invalid argument "%s"' % name)
 
     def _check_path(self, path):
