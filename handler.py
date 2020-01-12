@@ -15,6 +15,7 @@ from pyarmor.project import Project
 
 
 def call_pyarmor(args):
+    logging.info('Call pyarmor: %s', args)
     pyarmor_main(args)
 
 
@@ -239,8 +240,12 @@ class ProjectHandler(BaseHandler):
             'bootstrap_code': bootstrap,
         }
 
-        for k in ('name', 'title', 'output', 'platform', 'plugins'):
+        for k in ('name', 'title', 'platform', 'plugins'):
             data[k] = args.get(k)
+
+        output = args.get('output')
+        if not output:
+            data['output'] = os.path.join(args.get('src'), 'dist')
 
         return data
 
