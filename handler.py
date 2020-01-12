@@ -100,6 +100,13 @@ class RootHandler(BaseHandler):
             'python': '%s.%s.%s' % sys.version_info[:3]
         }
 
+    def do_register(self, regfile):
+        self._check_arg('file', regfile)
+        self._check_path(regfile)
+        cmd_args = ['register', quote(regfile)]
+        call_pyarmor(cmd_args)
+        return self.do_version()
+
 
 class DirectoryHandler(BaseHandler):
 
