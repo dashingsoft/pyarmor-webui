@@ -50,6 +50,22 @@ For example
     "python": "3.7.0",
     }
 
+### /register
+
+Register PyArmor with key file
+
+URL
+
+    http://localhost:9096/register
+
+Method: POST
+
+Arguments: String, the key filename
+
+Success: HTTP/1.1 200 OK
+
+Return: Same as [/version](/version)
+
 ### /directory/list
 
 List directories and files in this path
