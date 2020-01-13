@@ -207,6 +207,9 @@ class ProjectHandler(BaseHandler):
         if pkgmode == -1:
             pkgmode = 1
 
+        platforms = args.get('platforms', [])
+        self._check_arg('platforms', platforms, types=list)
+
         manifest = []
         if include == 'exact':
             if entry:
@@ -229,6 +232,7 @@ class ProjectHandler(BaseHandler):
             'src': src,
             'manifest': ','.join(manifest),
             'entry': ','.join(entry),
+            'platform': ','.join([x[-1] for x in platforms]),
             'cross_protection': get_bool('crossProtection'),
             'restrict_mode': get_bool('restrictMode', 2),
             'obf_mode': get_bool('obfMod'),
@@ -240,7 +244,7 @@ class ProjectHandler(BaseHandler):
             'bootstrap_code': bootstrap,
         }
 
-        for k in ('name', 'title', 'platform', 'plugins'):
+        for k in ('name', 'title', 'plugins'):
             data[k] = args.get(k)
 
         output = args.get('output')
