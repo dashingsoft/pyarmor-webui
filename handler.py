@@ -191,7 +191,7 @@ class ProjectHandler(BaseHandler):
 
         include = args.get('include')
         self._check_arg('include', include,
-                        valids=['exact', 'normal', 'recursive'])
+                        valids=['exact', 'glob', 'all'])
 
         exclude = args.get('exclude', [])
         self._check_arg('exclude', exclude, types=list)
@@ -214,9 +214,9 @@ class ProjectHandler(BaseHandler):
         if include == 'exact':
             if entry:
                 manifest.append('include ' + ' '.join(entry))
-        elif include == 'normal':
+        elif include == 'glob':
             manifest.append('include *.py')
-        elif include == 'recursive':
+        elif include == 'all':
             manifest.append('global-include *.py')
         for x in exclude:
             cmd = 'exclude' if x.endswith('.py') else 'prune'
