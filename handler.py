@@ -294,7 +294,7 @@ class ProjectHandler(BaseHandler):
 
         return output
 
-    def do_build_temp(self, args):
+    def _build_temp(self, args):
         data = self._build_data(args)
 
         name = 'project-%s' % self.temp_id
@@ -386,16 +386,20 @@ class ProjectHandler(BaseHandler):
 
     def do_build(self, args):
         c, p = self._get_project(args)
-        path = self._get_project_path(p)
+        if p is None:
+            return self._build_temp(args)
 
+        path = self._get_project_path(p)
         return self._build_target(path, args)
 
-    def _get_project(self, args):
+    def _get_project(self, args, silent=False):
         c = self._get_config()
         n = args.get('id')
         for p in c['projects']:
             if n == p['id']:
                 return c, p
+        if silent:
+            return c, None
         raise RuntimeError('No project %s found' % n)
 
     def _get_project_path(self, project):
