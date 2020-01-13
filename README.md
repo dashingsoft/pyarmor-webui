@@ -286,7 +286,6 @@ License Fields:
 | extraData  | String  |        |             |
 | summary    | String  |        |             |
 | filename   | String  |   N    | Readonly    |
-| summary    | String  |        |             |
 | disableRestrictMode | Boolean | | Unused |
 
 #### /list
