@@ -202,10 +202,10 @@ class ProjectHandler(BaseHandler):
         bootstrap = args.get('bootstrapCode')
         self._check_arg('bootstrap code', bootstrap, valids=[0, 1, 2, 3])
 
-        pkgmode = args.get('packageRuntime')
-        self._check_arg('package runtime', pkgmode, valids=[-1, 0, 1, 2, 3])
-        if pkgmode == -1:
-            pkgmode = 1
+        runmode = args.get('runtimeMode')
+        self._check_arg('runtime mode', runmode, valids=[-1, 0, 1, 2, 3])
+        if runmode == -1:
+            runmode = 1
 
         platforms = args.get('platforms', [])
         self._check_arg('platforms', platforms, types=list)
@@ -240,7 +240,7 @@ class ProjectHandler(BaseHandler):
             'wrap_mode': get_bool('wrapMode'),
             'advanced_mode': get_bool('advancedMode'),
             'license_file': licfile,
-            'package_runtime': pkgmode,
+            'runtime_mode': runmode,
             'bootstrap_code': bootstrap,
         }
 
@@ -282,7 +282,7 @@ class ProjectHandler(BaseHandler):
                 cmd_args.append('--without-license')
         else:
             cmd_args = ['build']
-            if args.get('packageRuntime') == -1:
+            if args.get('runtimeMode') == -1:
                 cmd_args.append('--no-runtime')
 
             if name:
@@ -498,7 +498,7 @@ class LicenseHandler(BaseHandler):
 
 def RuntimeHandler(BaseHandler):
 
-    options = ('platform', 'package_runtime', 'enable_suffix', 'with_license')
+    options = ('platform', 'mode', 'with_license')
 
     def __init__(self, config):
         super().__init__(config)
