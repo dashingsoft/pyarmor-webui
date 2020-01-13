@@ -385,7 +385,7 @@ class ProjectHandler(BaseHandler):
         return p
 
     def do_build(self, args):
-        c, p = self._get_project(args)
+        c, p = self._get_project(args, silent=True)
         if p is None:
             return self._build_temp(args)
 
