@@ -189,10 +189,6 @@ class ProjectHandler(BaseHandler):
         entry = args.get('entry', [])
         self._check_arg('entry', entry, types=list)
 
-        include = args.get('include')
-        self._check_arg('include', include,
-                        valids=['exact', 'glob', 'all'])
-
         exclude = args.get('exclude', [])
         self._check_arg('exclude', exclude, types=list)
 
@@ -210,14 +206,18 @@ class ProjectHandler(BaseHandler):
         platforms = args.get('platforms', [])
         self._check_arg('platforms', platforms, types=list)
 
+        include = args.get('include')
+        self._check_arg('include', include,
+                        valids=['exact', 'list', 'all'])
+
         manifest = []
         if include == 'exact':
             if entry:
                 manifest.append('include ' + ' '.join(entry))
-        elif include == 'glob':
-            manifest.append('include *.py')
         elif include == 'all':
             manifest.append('global-include *.py')
+        else:
+            manifest.append('include *.py')
         for x in exclude:
             cmd = 'exclude' if x.endswith('.py') else 'prune'
             manifest.append('%s %s' % (cmd, x))
