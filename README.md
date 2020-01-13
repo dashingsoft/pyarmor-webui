@@ -151,7 +151,7 @@ Project Fields
 | title      | String  |        |             |
 | src        | String  |   N    | Base path for entry, include, exclude, plugin |
 | entry      | List    |        | Entry scripts, relative src path |
-| include    | Enum    |   N    | ("exact", "glob", "all") |
+| include    | Enum    |   N    | ("exact", "list", "all") |
 | exclude    | List    |        | Exclude pathes or scripts, default is empty list |
 | buildTarget| Enum    |   N    | (0, 1, 2, 3) |
 | output     | String  |        | Default is $src/dist |
