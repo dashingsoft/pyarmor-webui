@@ -29,6 +29,7 @@ __version__ = '0.1'
 
 __config__ = {
     'version': __version__,
+    'wwwroot': os.path.join(os.path.dirname(__file__), 'static'),
     'basepath': os.path.dirname(__file__),
     'homepath': os.path.expanduser(os.path.join('~', '.pyarmor')),
 }
@@ -103,7 +104,8 @@ class HelperHandler(BaseHTTPRequestHandler):
         None, in which case the caller has nothing further to do.
 
         """
-        path = self.translate_path(self.path)
+        path = self.translate_path(self.path[1:])
+        logging.info('Request is %s, got path: %s', self.path, path)
         f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):
@@ -149,17 +151,8 @@ class HelperHandler(BaseHTTPRequestHandler):
         # abandon query parameters
         path = path.split('?', 1)[0]
         path = path.split('#', 1)[0]
-        path = posixpath.normpath(unquote(path))
-        words = path.split('/')
-        words = filter(None, words)
-        path = __config__['basepath']
-        for word in words:
-            drive, word = os.path.splitdrive(word)
-            head, word = os.path.split(word)
-            if word in (os.curdir, os.pardir):
-                continue
-            path = os.path.join(path, word)
-        return path
+        path = os.path.join(__config__['wwwroot'], unquote(path))
+        return posixpath.normpath(path)
 
     def copyfile(self, source, outputfile):
         """Copy all data between two file objects.
@@ -202,6 +195,7 @@ class HelperHandler(BaseHTTPRequestHandler):
             return self.extensions_map['']
     extensions_map = {
         '': 'application/octet-stream',
+        '.svg': 'image/svg+xml',
         '.css': 'text/css',
         '.html': 'text/html',
         '.js': 'application/x-javascript',
