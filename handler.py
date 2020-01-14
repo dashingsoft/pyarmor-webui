@@ -246,6 +246,7 @@ class ProjectHandler(BaseHandler):
             'license_file': licfile,
             'runtime_mode': runmode,
             'bootstrap_code': bootstrap,
+            'is_package': 0,
         }
 
         for k in ('name', 'title'):
@@ -268,18 +269,18 @@ class ProjectHandler(BaseHandler):
 
         if target:
             cmd_args = ['pack']
-            xoptions = args.get('pack', [])
-            self._check_arg('pack', xoptions, types=list)
-            if target == 2:
-                xoptions.append('--onefile')
-            elif target == 3:
-                xoptions.append('--runtime-hook')
+            options = args.get('pack', [])
+            self._check_arg('pack', options, types=list)
+            if target in (2, 3):
+                options.append('--onefile')
+            if target == 3:
+                options.append('--runtime-hook')
                 p = os.path.dirname(os.path.abspath(__file__))
-                xoptions.append(os.path.join(p, 'data', 'copy_license.py'))
-            if xoptions:
-                cmd_args.append('--xoptions')
-                cmd_args.append(' '.join([x if x.starswith('-') else quote(x)
-                                          for x in xoptions]))
+                options.append(os.path.join(p, 'data', 'copy_license.py'))
+            if options:
+                cmd_args.append('--options')
+                v = [x if x.startswith('-') else quote(x) for x in options]
+                cmd_args.append(" %s" % (' '.join(v)))
             if name:
                 cmd_args.extend(['--name', name])
             if target == 3 or args.get('licenseFile') == 'false':
@@ -502,8 +503,6 @@ class LicenseHandler(BaseHandler):
 
 def RuntimeHandler(BaseHandler):
 
-    options = ('platform', 'mode', 'with_license')
-
     def __init__(self, config):
         super().__init__(config)
         self.name = 'runtime'
@@ -513,7 +512,7 @@ def RuntimeHandler(BaseHandler):
         output = args.get('output', self._get_path())
         cmd_args.extend(['--output', output])
 
-        for x in self.options:
+        for x in ('platform', 'mode', 'with_license'):
             if x in args:
                 cmd_args.append('--%s' % x.replace('_', '-'))
                 v = args.get(x)

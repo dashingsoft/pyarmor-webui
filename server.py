@@ -105,7 +105,6 @@ class HelperHandler(BaseHTTPRequestHandler):
 
         """
         path = self.translate_path(self.path[1:])
-        logging.info('Request is %s, got path: %s', self.path, path)
         f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):
