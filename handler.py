@@ -206,6 +206,9 @@ class ProjectHandler(BaseHandler):
         platforms = args.get('platforms', [])
         self._check_arg('platforms', platforms, types=list)
 
+        plugins = args.get('plugins', [])
+        self._check_arg('plugins', plugins, types=list)
+
         include = args.get('include')
         self._check_arg('include', include,
                         valids=['exact', 'list', 'all'])
@@ -233,6 +236,7 @@ class ProjectHandler(BaseHandler):
             'manifest': ','.join(manifest),
             'entry': ','.join(entry),
             'platform': ','.join([x[-1] for x in platforms]),
+            'plugins': [os.path.join(src, x) for x in plugins],
             'cross_protection': get_bool('crossProtection'),
             'restrict_mode': get_bool('restrictMode', 2),
             'obf_mode': get_bool('obfMod'),
@@ -244,7 +248,7 @@ class ProjectHandler(BaseHandler):
             'bootstrap_code': bootstrap,
         }
 
-        for k in ('name', 'title', 'plugins'):
+        for k in ('name', 'title'):
             data[k] = args.get(k)
 
         output = args.get('output')
