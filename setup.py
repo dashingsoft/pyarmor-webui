@@ -1,13 +1,16 @@
 from setuptools import setup
 
+__version__ = '0.1'
+
 with open('README.rst') as f:
     long_description = f.read()
 
 setup(
     name='pyarmor-webui',
-    version='0.1.0',
-    description='A webui for pyarmor to obfuscate python scripts.',
+    version=__version__,
+    description='A webui tool used to obfuscate and pack python scripts based on pyarmor',
     long_description=long_description,
+    license="MIT License",
     license_file='LICENSE',
     url='https://github.com/dashingsoft/pyarmor-webui',
     author='Jondy Zhao',

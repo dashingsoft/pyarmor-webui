@@ -1,7 +1,7 @@
-PyArmor WebUI
+pyarmor-webui
 =============
 
-PyArmor WebUI is a web-ui for pyarmor. It's a tool to obfuscate python
+pyarmor-webui is a web-ui for pyarmor. It's a tool to obfuscate python
 scripts, bind obfuscated scripts to fixed machine or expire obfuscated
 scripts.
 

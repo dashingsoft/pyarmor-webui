@@ -201,7 +201,7 @@ class HelperHandler(BaseHTTPRequestHandler):
         }
 
 
-def main(argv):
+def main(argv=None):
     logging.basicConfig(
         level=logging.INFO,
         format='%(levelname)-8s %(message)s',
@@ -213,15 +213,16 @@ def main(argv):
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
     parser.add_argument('-p', '--port', type=int, default=9096,
-                        help='Serve port')
+                        help='Serve port, default is 9096')
     parser.add_argument('-H', '--host', default='localhost',
-                        help='Bind host')
+                        help='Bind host, default is localhost')
     parser.add_argument('-n', '--no-browser', action='store_true',
                         help='Do not open web browser')
-    parser.add_argument('-i', '--index', default='', help='Index page')
+    parser.add_argument('-i', '--index', default='',
+                        help='Index page, default is index.html')
     parser.add_argument('--data-path',
-                        help='Where to save projects and licenses')
-    args = parser.parse_args(argv)
+                        help='Where to save projects, default is ~/.pyarmor')
+    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     if args.data_path:
         __config__['homepath'] = args.data_path
@@ -237,4 +238,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
