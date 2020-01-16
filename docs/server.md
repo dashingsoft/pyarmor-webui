@@ -156,18 +156,20 @@ Project Fields
 | buildTarget| Enum    |   N    | (0, 1, 2, 3) |
 | output     | String  |        | Default is $src/dist |
 | bundleName | String  |        | For pack, name bundle name. For obfuscate, package name |
-| runtimeMode| Enum    |   N    | (0, 1, 2, 3) |
 | plugins    | List    |        | Plugin script name, relatvie src path |
 | licenseFile| String  |        | "true", "false" or absolute path of "license.lic" |
 | platforms  | List    |        | For example, [ ['arm', 'linux.aarch32.0'], [...] ] |
 | pack       | List    |        | Pack options, for example, ['--hidden-import', 'ctypes'] |
+| packageRuntime  | Enum    |   N    | (0, 1) |
 | bootstrapCode   | Enum    |   N    | (0, 1, 2, 3) |
 | restrictMode    | Enum    |   N    | (0, 1, 2, 3, 4) |
 | crossProtection | Boolean |   N    | Default is true |
 | obfMod          | Boolean |   N    | Default is true |
 | obfCode         | Boolean |   N    | Default is true |
 | wrapMode        | Boolean |   N    | Default is true |
-| advancedMode    | Boolean |   N    | Default is true |
+| advancedMode    | Boolean |   N    | Default is false |
+| enableSuffix    | Boolean |   N    | Default is false |
+| noRuntime       | Boolean |   N    | Default is false |
 
 
 #### /list

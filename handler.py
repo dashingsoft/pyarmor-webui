@@ -198,11 +198,6 @@ class ProjectHandler(BaseHandler):
         bootstrap = args.get('bootstrapCode')
         self._check_arg('bootstrap code', bootstrap, valids=[0, 1, 2, 3])
 
-        runmode = args.get('runtimeMode')
-        self._check_arg('runtime mode', runmode, valids=[-1, 0, 1, 2, 3])
-        if runmode == -1:
-            runmode = 1
-
         platforms = args.get('platforms', [])
         self._check_arg('platforms', platforms, types=list)
 
@@ -243,8 +238,9 @@ class ProjectHandler(BaseHandler):
             'obf_code': get_bool('obfCode'),
             'wrap_mode': get_bool('wrapMode'),
             'advanced_mode': get_bool('advancedMode'),
+            'enable_suffix': get_bool('enableSuffix'),
             'license_file': licfile,
-            'runtime_mode': runmode,
+            'package_runtime': get_bool('packageRuntime'),
             'bootstrap_code': bootstrap,
             'is_package': 0,
         }
@@ -287,7 +283,7 @@ class ProjectHandler(BaseHandler):
                 cmd_args.append('--without-license')
         else:
             cmd_args = ['build']
-            if args.get('runtimeMode') == -1:
+            if args.get('noRuntime'):
                 cmd_args.append('--no-runtime')
 
             if name:
