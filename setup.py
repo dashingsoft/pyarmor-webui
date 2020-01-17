@@ -49,7 +49,8 @@ setup(
     packages=['pyarmor.webui'],
     package_dir={'pyarmor.webui': '.'},
     package_data={
-        'pyarmor.webui': ['README.rst', 'LICENSE',
+        'pyarmor.webui': ['README.rst', 'LICENSE', 'data/*.py',
+                          'test/README.md', 'test/*.robot',
                           'static/index.html', 'static/*.js', 'static/*.ico',
                           'static/css/*.css', 'static/js/*.js',
                           'static/fonts/element-*', 'static/img/*.svg'],
