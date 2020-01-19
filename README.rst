@@ -13,7 +13,7 @@ Start it in the default web browser::
 
   pyarmor-webui
 
-A light-weigh web server will run on default port 9096 to server the
+A light-weigh web server will run on default port 9096 to serve the
 request of web pages. If this port is used by others, start it with
 other port. For example::
 
