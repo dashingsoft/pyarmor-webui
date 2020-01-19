@@ -17,7 +17,7 @@ Prepare Test Data
     Create Directory    ${SRC}
     Create File    ${SRC}/main.py    print("This is pyarmor-webui test")
 
-Pack Script To One Folder
+Pack Script To One File Bundle
     Open Browser To Home Page
     Click Home Tab Button    Pack Script Wizard
     Page Should Contain    Pack Script Wizard

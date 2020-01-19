@@ -15,10 +15,11 @@ ${FINAL BUNDLE}        ${SRC}/dist/main/main
 Prepare Test Data
     Remove Directory    ${SRC}    True
     Create Directory    ${SRC}
-    Create File    ${SRC}/main.py    m = __import__("re")\nprint("This is pyarmor-webui test")
+    Create File    ${SRC}/cook.py    print("This is pyarmor-webui test")
+    Create File    ${SRC}/main.py    __import__("cook")
     Create File    ${SRC}/README    This is data file
 
-Pack Script To One Folder
+Pack Script With Hidden Import And Data File
     Open Browser To Home Page
     Click Home Tab Button    Pack Script Wizard
 
@@ -27,7 +28,7 @@ Pack Script To One Folder
     Select Script    main.py
 
     Click Button    Next
-    Input Select Field    Hidden Imports    re
+    Input Select Field    Hidden Imports    cook
     Sleep    1s
     Input Select Field    Data Files    README:.
 

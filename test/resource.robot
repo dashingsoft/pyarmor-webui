@@ -48,9 +48,9 @@ Input Textarea Field
     [Arguments]    ${label}    ${value}
     Input Text    //div[@class="el-form-item" and descendant::label = "${label}"]/descendant::textarea[@class="el-textarea__inner"]    ${value}
 
-Input Src Path
-    [Arguments]    ${value}
-    ${elem} =    Get WebElement    //div[@class="el-form-item is-required" and descendant::label = "Src"]/descendant::input[@class="el-input__inner"]
+Input Path
+    [Arguments]    ${label}    ${value}
+    ${elem} =    Get WebElement    //div[starts-with(@class, "el-form-item") and descendant::label = "${label}"]/descendant::input[@class="el-input__inner"]
     Click Element    ${elem}
     Input Text    ${elem}    ${value}
     Simulate Event    ${elem}    blur
@@ -59,6 +59,14 @@ Input Src Path
     Wait Until Element Is Not Visible    //div[@class="el-select-dropdown el-popper"]
     Sleep    1s
 
+Input Src Path
+    [Arguments]    ${value}
+    Input Path    Src    ${value}
+
+Input Output Path
+    [Arguments]    ${value}
+    Input Path    Output    ${value}
+
 Select Script
     [Arguments]    ${value}
     ${elem} =    Get WebElement    //div[@class="el-form-item is-required" and descendant::label = "Script"]/descendant::input[@class="el-input__inner"]
@@ -66,6 +74,34 @@ Select Script
     Wait Until Element Is Visible    //ul[@class="el-scrollbar__view el-cascader-menu__list"]
     Click Element    //ul[@class="el-scrollbar__view el-cascader-menu__list"]/li[span = "${value}"]
     Wait Until Element Is Not Visible    //ul[@class="el-scrollbar__view el-cascader-menu__list"]
+
+Select One Script
+    [Arguments]    ${value}
+    ${elem} =    Get WebElement    //div[@class="el-form-item" and descendant::label = "Script"]/descendant::input[@class="el-input__inner"]
+    Click Element    ${elem}
+    Wait Until Element Is Visible    //div[@class="el-popper el-cascader__dropdown" and not(contains(@style, "display: none"))]
+    Click Element    //div[@class="el-popper el-cascader__dropdown" and not(contains(@style, "display: none"))]//ul[@class="el-scrollbar__view el-cascader-menu__list"]/li[span = "${value}"]
+    Wait Until Element Is Not Visible    //ul[@class="el-scrollbar__view el-cascader-menu__list"]
+
+Select Two Scripts
+    [Arguments]    ${one}    ${two}
+    ${dropdown menu} =    Set Variable    //div[@class="el-popper el-cascader__dropdown" and not(contains(@style, "display: none"))]
+    Click Element    //div[@class="el-form-item" and descendant::label = "Scripts"]/descendant::input[@class="el-cascader__search-input"]
+    Wait Until Element Is Visible    ${dropdown menu}
+    Click Element    ${dropdown menu}//li[@class="el-cascader-node" and span="${one}"]//span[@class="el-checkbox__input"]
+    Click Element    ${dropdown menu}//li[@class="el-cascader-node" and span="${two}"]//span[@class="el-checkbox__input"]
+    Wait Until Element Is Not Visible    //ul[@class="el-scrollbar__view el-cascader-menu__list"]
+
+Select Include Mode
+    [Arguments]    ${value}
+    ${elem} =    Get WebElement    //div[@class="el-form-item" and descendant::label = "Include"]/descendant::input[@class="el-input__inner"]
+    Click Element    ${elem}
+    Sleep    1s
+    Click Element    //ul[@class="el-scrollbar__view el-select-dropdown__list"]/li[span = "${value}"]
+    Sleep    1s
+
+Switch Package Name
+    Click Element    //div[@class="el-form-item" and descendant::label = "Package Name"]/descendant::div[@class="el-switch"]
 
 Select Bundle
     [Arguments]    ${value}
@@ -101,6 +137,8 @@ Wait Until Building End
 Input Expired Date
     [Arguments]    ${date}
     Input Text    name:expired    ${date}
+    Click Element    //label["Expired"]
+    Sleep    1s
 
 Message Should Be Shown
     [Arguments]    ${text}

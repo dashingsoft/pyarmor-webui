@@ -20,7 +20,7 @@ Prepare Test Data
     Create File    ${SRC}/main.py    print("This is pyarmor-webui test")
     Should Exist    ${OUTER LICENSE}
 
-Pack Script To One Folder
+Pack One File Bundle With Outer License
     Open Browser To Home Page
     Click Home Tab Button    Pack Script Wizard
     Page Should Contain    Pack Script Wizard

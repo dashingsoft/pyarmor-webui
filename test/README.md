@@ -37,12 +37,7 @@ Or run the whole test suite
 
 * [Obfuscate one script](obfuscate_one_script.robot)
 * [Obfuscate multiple entries](obfuscate_multiple_entries.robot)
-* [Obfuscate high security script](obfuscate_high_security_script.robot)
 * [Obfuscate one package](obfuscate_one_package.robot)
-* [Obfuscate with license](obfuscate_with_license.robot)
-
-* [Obfuscate cross platform](obfuscate_cross_platform.robot)
-* [Obfuscate cross multiple platforms](obfuscate_cross_multiple_platforms.robot)
 
 * [Pack one folder bundle](pack_one_folder_bundle.robot)
 * [Pack one file bundle](pack_one_file_bundle.robot)
