@@ -7,6 +7,7 @@ import sys
 
 from fnmatch import fnmatch
 from shlex import quote
+from subprocess import Popen
 
 from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
                              get_registration_code, query_keyinfo,
@@ -17,6 +18,13 @@ from pyarmor.project import Project
 def call_pyarmor(args):
     logging.info('Call pyarmor: %s', args)
     pyarmor_main(args)
+
+
+def run_pyarmor(args):
+    p = Popen([sys.executable, '-m', 'pyarmor.pyarmor'] + args)
+    p.wait()
+    if p.returncode != 0:
+        raise RuntimeError('Build project failed (%s)' % p.returncode)
 
 
 class BaseHandler():
@@ -291,7 +299,7 @@ class ProjectHandler(BaseHandler):
         cmd_args.extend(['--output', output])
 
         cmd_args.append(path)
-        call_pyarmor(cmd_args)
+        run_pyarmor(cmd_args)
 
         return output
 
