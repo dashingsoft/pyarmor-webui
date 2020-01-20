@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -53,7 +53,8 @@ setup(
                           'test/README.md', 'test/*.robot',
                           'static/index.html', 'static/*.js', 'static/*.ico',
                           'static/css/*.css', 'static/js/*.js',
-                          'static/fonts/element-*', 'static/img/*.svg'],
+                          'static/fonts/element-*',
+                          'static/img/*.svg', 'static/img/*.png'],
     },
 
     entry_points={
