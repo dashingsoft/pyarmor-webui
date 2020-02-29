@@ -63,5 +63,5 @@ setup(
         ],
     },
 
-    install_requires=['pyarmor>=5.9'],
+    install_requires=['pyarmor>=5.9.1'],
 )
