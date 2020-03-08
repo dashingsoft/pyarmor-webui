@@ -241,7 +241,7 @@ class ProjectHandler(BaseHandler):
             'platform': ','.join([x[-1] for x in platforms]),
             'plugins': [os.path.join(src, x) for x in plugins],
             'cross_protection': get_bool('crossProtection'),
-            'restrict_mode': get_bool('restrictMode', 2),
+            'restrict_mode': args.get('restrictMode', 2),
             'obf_mode': get_bool('obfMod'),
             'obf_code': get_bool('obfCode'),
             'wrap_mode': get_bool('wrapMode'),
