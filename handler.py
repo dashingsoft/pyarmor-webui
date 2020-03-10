@@ -112,7 +112,7 @@ class RootHandler(BaseHandler):
     def do_register(self, regfile):
         self._check_arg('file', regfile)
         self._check_path(regfile)
-        cmd_args = ['register', quote(regfile)]
+        cmd_args = ['register', os.path.expandvars(regfile)]
         call_pyarmor(cmd_args)
         return self.do_version()
 
