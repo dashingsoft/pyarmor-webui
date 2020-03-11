@@ -38,5 +38,6 @@ Before that make sure `pyarmor` has been installed::
 More Resources
 --------------
 
+- `snapshots <https://github.com/dashingsoft/pyarmor-webui/tree/master/snapshots>`_
 - `pyarmor <https://github.com/dashingsoft/pyarmor>`_
 - `pyarmor-vue <https://github.com/dashingsoft/pyarmor-vue>`_
