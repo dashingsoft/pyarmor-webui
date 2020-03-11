@@ -1,9 +1,18 @@
 # Snapshots
 
+## Home
 ![Home](home.png)
-![Obfuscate Wizard](obfuscate-wizard.ng)
+
+## Obfuscate Wizard
+![Obfuscate Wizard](obfuscate-wizard.png)
+
+## Pack Wizard
 ![Pack Wizard](pack-wizard.png)
+
+## Project
 ![New Project](new-project.png)
-![New License](new-license.png)
 ![My Projects](my-projects.png)
+
+## License
+![New License](new-license.png)
 ![My Licenses](my-licenses.png)
