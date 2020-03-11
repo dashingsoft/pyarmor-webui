@@ -423,10 +423,11 @@ class LicenseHandler(BaseHandler):
         'ipv4': '--bind-ipv4',
         'mac': '--bind-mac',
         'expired': '--expired',
-        'extra_data': '--bind-data',
-        'disable_restrict_mode': '--disable-restrict-mode',
+        'extraData': '--bind-data',
+        'disableRestrictMode': '--disable-restrict-mode',
+        'enablePeriodMode': '--enable-period-mode',
     }
-    switch_option_names = 'disable_restrict_mode',
+    switch_option_names = 'disableRestrictMode', 'enablePeriodMode'
 
     def __init__(self, config):
         super().__init__(config)

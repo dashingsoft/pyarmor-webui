@@ -41,3 +41,10 @@ More Resources
 - `snapshots <https://github.com/dashingsoft/pyarmor-webui/tree/master/snapshots>`_
 - `pyarmor <https://github.com/dashingsoft/pyarmor>`_
 - `pyarmor-vue <https://github.com/dashingsoft/pyarmor-vue>`_
+
+Change Logs
+-----------
+
+0.8
+~~~
+* Fix license option `Extra data` doesn't work issue
