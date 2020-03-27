@@ -32,8 +32,9 @@ def call_pyarmor(args):
     pyarmor_main(args)
 
 
-def run_pyarmor(args):
-    p = Popen([sys.executable, '-m', 'pyarmor.pyarmor'] + args)
+def run_pyarmor(args, debug=False):
+    cmd = [sys.executable, '-d'] if debug else [sys.executable]
+    p = Popen(cmd + ['-m', 'pyarmor.pyarmor'] + args)
     p.wait()
     if p.returncode != 0:
         raise RuntimeError('Build project failed (%s)' % p.returncode)
@@ -274,7 +275,7 @@ class ProjectHandler(BaseHandler):
 
         return data
 
-    def _build_target(self, path, args):
+    def _build_target(self, path, args, debug=False):
         target = args.get('buildTarget')
         self._check_arg('target', target, valids=[0, 1, 2, 3])
 
@@ -311,11 +312,11 @@ class ProjectHandler(BaseHandler):
         cmd_args.extend(['--output', output])
 
         cmd_args.append(path)
-        run_pyarmor(cmd_args)
+        run_pyarmor(cmd_args, debug=debug)
 
         return output
 
-    def _build_temp(self, args):
+    def _build_temp(self, args, debug=False):
         data = self._build_data(args)
 
         name = 'project-%s' % self.temp_id
@@ -334,7 +335,7 @@ class ProjectHandler(BaseHandler):
         project._update(data)
         project.save(path)
 
-        return self._build_target(path, args)
+        return self._build_target(path, args, debug=debug)
 
     def do_new(self, args):
         c = self._get_config()
@@ -405,13 +406,16 @@ class ProjectHandler(BaseHandler):
 
         return p
 
-    def do_build(self, args):
+    def do_build(self, args, debug=False):
         c, p = self._get_project(args, silent=True)
         if p is None:
-            return self._build_temp(args)
+            return self._build_temp(args, debug=debug)
 
         path = self._get_project_path(p)
-        return self._build_target(path, args)
+        return self._build_target(path, args, debug=debug)
+
+    def do_diagnostics(self, args):
+        return self.do_build(args, debug=True)
 
     def _get_project(self, args, silent=False):
         c = self._get_config()
