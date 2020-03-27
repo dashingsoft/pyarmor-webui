@@ -7,6 +7,7 @@ import shutil
 import sys
 
 from fnmatch import fnmatch
+from shlex import split as shell_split
 from subprocess import Popen
 
 from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
@@ -275,6 +276,30 @@ class ProjectHandler(BaseHandler):
 
         return data
 
+    def _handle_pack_options(self, src, options):
+        result = []
+        for item in options:
+            for x in shell_split(item):
+                result.extend(x.split('=', 1) if x.find('=') > 0 else [x])
+        i = 0
+        n = len(result)
+        while i < n:
+            v = result[i]
+            if v in ('--onefile', '-F', '--onefolder', '-D',
+                     '--name', '-N', '--distpath'):
+                raise RuntimeError('Option "%s" could not be used here' % v)
+            if v in ('--add-data', '--add-binary'):
+                i += 1
+                if result[i].find(os.pathsep) == -1:
+                    result[i] += os.pathsep + '.'
+                if not os.path.abspath(result[i]):
+                    result[i] = os.path.join(src, result[i])
+            elif v in ('-i', '--icon'):
+                i += 1
+                if not os.path.abspath(result[i]):
+                    result[i] = os.path.join(src, result[i])
+        return result
+
     def _build_target(self, path, args, debug=False):
         target = args.get('buildTarget')
         self._check_arg('target', target, valids=[0, 1, 2, 3])
@@ -296,7 +321,8 @@ class ProjectHandler(BaseHandler):
                 options.append(os.path.join(p, 'data', 'copy_license.py'))
             if options:
                 cmd_args.append('--options')
-                v = [x if x.startswith('-') else quote(x) for x in options]
+                v = self._handle_pack_options(args.get('src'), options)
+                v.extend(['--additional-hooks-dir', quote(path)])
                 cmd_args.append(" %s" % (' '.join(v)))
             if name:
                 cmd_args.extend(['--name', name])
