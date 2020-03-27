@@ -25,7 +25,7 @@ try:
 except Exception:
     from handler import RootHandler
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 __config__ = {
     'version': __version__,
