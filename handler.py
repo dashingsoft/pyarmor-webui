@@ -2,17 +2,29 @@ import glob
 import logging
 import json
 import os
+import re
 import shutil
 import sys
 
 from fnmatch import fnmatch
-from shlex import quote
 from subprocess import Popen
 
 from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
                              get_registration_code, query_keyinfo,
                              version as pyarmor_version)
 from pyarmor.project import Project
+
+
+def quote(s):
+    """Return a shell-escaped version of the string *s*."""
+    if not s:
+        return "''"
+    if re.compile(r'[^\w@%+=:,./-]', re.ASCII).search(s) is None:
+        return s
+
+    # use single quotes, and put single quotes into double quotes
+    # the string $'b is then quoted as '$'"'"'b'
+    return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
 def call_pyarmor(args):

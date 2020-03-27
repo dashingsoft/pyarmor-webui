@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+0.9
+~~~
+* Fix python2.7 issue: No module named shelx
+
 0.8
 ~~~
 * Fix license option `Extra data` doesn't work issue
