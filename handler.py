@@ -414,7 +414,7 @@ class ProjectHandler(BaseHandler):
         path = self._get_project_path(p)
         return self._build_target(path, args, debug=debug)
 
-    def do_diagnostics(self, args):
+    def do_diagnose(self, args):
         return self.do_build(args, debug=True)
 
     def _get_project(self, args, silent=False):
