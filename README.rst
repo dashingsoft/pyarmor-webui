@@ -48,6 +48,12 @@ Change Logs
 0.9
 ~~~
 * Fix python2.7 issue: No module named shelx
+* Add new platform: `uclibc.armv7.0`
+* In my projects page add a project action `Diagnose` to print debug information
+  in case something is wrong with building the project
+* In project edit page add 2 buttons: `Build`, `Diagnose`
+* In project edit page, the field of `Pack options` now is textarea
+* Change default restrict mode to `1`
 
 0.8
 ~~~
