@@ -253,7 +253,7 @@ class ProjectHandler(BaseHandler):
             'manifest': ','.join(manifest),
             'entry': ','.join(entry),
             'platform': ','.join([x[-1] for x in platforms]),
-            'plugins': [os.path.join(src, x) for x in plugins],
+            'plugins': [x for x in plugins],
             'cross_protection': get_bool('crossProtection'),
             'restrict_mode': args.get('restrictMode', 2),
             'obf_mode': get_bool('obfMod'),
@@ -285,8 +285,8 @@ class ProjectHandler(BaseHandler):
         n = len(result)
         while i < n:
             v = result[i]
-            if v in ('--onefile', '-F', '--onefolder', '-D',
-                     '--name', '-N', '--distpath'):
+            if v in ('--onefile', '-F', '--onefolder', '-D', '--name', '-N',
+                     '--noconfirm', '-y', '--distpath'):
                 raise RuntimeError('Option "%s" could not be used here' % v)
             if v in ('--add-data', '--add-binary'):
                 i += 1
@@ -294,7 +294,9 @@ class ProjectHandler(BaseHandler):
                     result[i] += os.pathsep + '.'
                 if not os.path.abspath(result[i]):
                     result[i] = os.path.join(src, result[i])
-            elif v in ('-i', '--icon'):
+            elif v in ('-i', '--icon', '-p', '--paths', '--runtime-hook',
+                       '--additional-hooks-dir', '--version-file',
+                       '-m', '--manifest', '-r', '--resource'):
                 i += 1
                 if not os.path.abspath(result[i]):
                     result[i] = os.path.join(src, result[i])
