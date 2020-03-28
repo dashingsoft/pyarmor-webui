@@ -30,7 +30,7 @@ Pack Script With Hidden Import And Data File
     Click Button    Next
     Input Select Field    Hidden Imports    cook
     Sleep    1s
-    Input Select Field    Data Files    README:.
+    Input Select Field    Data Files    README
 
     Click Button    Pack
     Wait Until Building End
