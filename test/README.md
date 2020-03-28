@@ -21,6 +21,11 @@ placing it into a directory that is in `PATH`. Drivers for different browsers
 can be found via [Selenium
 documentation](https://selenium.dev/selenium/docs/api/py/index.html#drivers).
 
+Start pyarmor-webui at port 8080, the port must be same as specified
+in the [resource.robot](resource.robot]:
+
+    pyarmor-webui -p 8080 -n
+
 Now run any of one testcase. For example
 
     robot generate_expired_license.robot
