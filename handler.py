@@ -286,7 +286,7 @@ class ProjectHandler(BaseHandler):
         while i < n:
             v = result[i]
             if v in ('--onefile', '-F', '--onefolder', '-D', '--name', '-N',
-                     '--noconfirm', '-y', '--distpath'):
+                     '--noconfirm', '-y', '--distpath', '--specpath'):
                 raise RuntimeError('Option "%s" could not be used here' % v)
             if v in ('--add-data', '--add-binary'):
                 i += 1
@@ -300,6 +300,7 @@ class ProjectHandler(BaseHandler):
                 i += 1
                 if not os.path.abspath(result[i]):
                     result[i] = os.path.join(src, result[i])
+            i += 1
         return result
 
     def _build_target(self, path, args, debug=False):
