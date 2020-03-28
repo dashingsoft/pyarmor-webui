@@ -280,7 +280,8 @@ class ProjectHandler(BaseHandler):
         result = []
         for item in options:
             for x in shell_split(item):
-                result.extend(x.split('=', 1) if x.find('=') > 0 else [x])
+                if x:
+                    result.extend(x.split('=', 1) if x.find('=') > 0 else [x])
         i = 0
         n = len(result)
         while i < n:
@@ -314,8 +315,9 @@ class ProjectHandler(BaseHandler):
 
         if target:
             cmd_args = ['pack']
-            options = args.get('pack', [])
-            self._check_arg('pack', options, types=list)
+            pack = args.get('pack', [])
+            self._check_arg('pack', pack, types=list)
+            options = self._handle_pack_options(args.get('src'), pack)
             if target in (2, 3):
                 options.append('--onefile')
             if target == 3:
@@ -324,9 +326,8 @@ class ProjectHandler(BaseHandler):
                 options.append(os.path.join(p, 'data', 'copy_license.py'))
             if options:
                 cmd_args.append('--options')
-                v = self._handle_pack_options(args.get('src'), options)
-                v.extend(['--additional-hooks-dir', quote(path)])
-                cmd_args.append(" %s" % (' '.join(v)))
+                options.extend(['--additional-hooks-dir', quote(path)])
+                cmd_args.append(" %s" % (' '.join(options)))
             if name:
                 cmd_args.extend(['--name', name])
             if target == 3 or args.get('licenseFile') == 'false':
