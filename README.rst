@@ -48,6 +48,7 @@ Change Logs
 1.0
 ~~~
 * Add 2 plugins `on`, `assert_armored` in the plugin selection list
+* Fix python 2.7 failed issue: `TypeError: super() takes at least 1 argument (0 given)`
 
 0.9
 ~~~

@@ -41,7 +41,7 @@ def run_pyarmor(args, debug=False):
         raise RuntimeError('Build project failed (%s)' % p.returncode)
 
 
-class BaseHandler():
+class BaseHandler(object):
 
     data_file = 'index.json'
 
@@ -104,7 +104,7 @@ class BaseHandler():
 class RootHandler(BaseHandler):
 
     def __init__(self, config):
-        super().__init__(config)
+        super(RootHandler, self).__init__(config)
         self.children.extend([
             ProjectHandler(config),
             LicenseHandler(config),
@@ -134,7 +134,7 @@ class RootHandler(BaseHandler):
 class DirectoryHandler(BaseHandler):
 
     def __init__(self, config):
-        super().__init__(config)
+        super(DirectoryHandler, self).__init__(config)
         self.name = 'directory'
 
     def do_new(self, args):
@@ -200,7 +200,7 @@ class ProjectHandler(BaseHandler):
     temp_id = 0
 
     def __init__(self, config):
-        super().__init__(config)
+        super(ProjectHandler, self).__init__(config)
         self.name = 'project'
 
     def _build_data(self, args):
@@ -476,7 +476,7 @@ class LicenseHandler(BaseHandler):
     switch_option_names = 'disableRestrictMode', 'enablePeriodMode'
 
     def __init__(self, config):
-        super().__init__(config)
+        super(LicenseHandler, self).__init__(config)
         self.name = 'license'
 
     def do_new(self, args):
@@ -552,10 +552,10 @@ class LicenseHandler(BaseHandler):
         raise RuntimeError('No license %s found' % n)
 
 
-def RuntimeHandler(BaseHandler):
+class RuntimeHandler(BaseHandler):
 
     def __init__(self, config):
-        super().__init__(config)
+        super(RuntimeHandler, self).__init__(config)
         self.name = 'runtime'
 
     def do_new(self, args):
