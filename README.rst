@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.0
+~~~
+* Add 2 plugins `on`, `assert_armored` in the plugin selection list
+
 0.9
 ~~~
 * Fix python2.7 issue: No module named shelx

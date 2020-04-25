@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = 0.9
+__version__ = '1.0'
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -63,5 +63,5 @@ setup(
         ],
     },
 
-    install_requires=['pyarmor>=5.9.3'],
+    install_requires=['pyarmor>=6.0.2'],
 )
