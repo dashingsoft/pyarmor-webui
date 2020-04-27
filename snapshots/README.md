@@ -3,10 +3,8 @@
 ## Home
 ![Home](home.png)
 
-## Obfuscate Wizard
+## Wizard
 ![Obfuscate Wizard](obfuscate-wizard.png)
-
-## Pack Wizard
 ![Pack Wizard](pack-wizard.png)
 
 ## Project
