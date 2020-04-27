@@ -7,7 +7,7 @@ Documentation     A resource file with reusable keywords and variables.
 Library           SeleniumLibrary
 
 *** Variables ***
-${SERVER}         http://localhost:8080
+${SERVER}         http://localhost:9096
 ${BROWSER}        Firefox
 ${DELAY}          0
 ${DATAHOME}       /Users/jondy/.pyarmor

@@ -21,10 +21,10 @@ placing it into a directory that is in `PATH`. Drivers for different browsers
 can be found via [Selenium
 documentation](https://selenium.dev/selenium/docs/api/py/index.html#drivers).
 
-Start pyarmor-webui at port 8080, the port must be same as specified
+Start pyarmor-webui at port 9096, the port must be same as specified
 in the [resource.robot](resource.robot]:
 
-    pyarmor-webui -p 8080 -n
+    pyarmor-webui -p 9096 -n
 
 Now run any of one testcase. For example
 
@@ -32,7 +32,7 @@ Now run any of one testcase. For example
 
 Or run the whole test suite
 
-    robot pyarmor_webui_suite.robot
+    robot .
 
 ## Test Case List
 
@@ -48,3 +48,7 @@ Or run the whole test suite
 * [Pack one file bundle](pack_one_file_bundle.robot)
 * [Pack one file bundle with outer license](pack_one_file_with_outer_license.robot)
 * [Pack with data_file](pack_with_data_file.robot)
+
+## References
+
+* [RobotFramework User Guide](http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html)
