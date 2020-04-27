@@ -8,6 +8,7 @@
 #
 #    bash run-test.sh generate_expired_license.robot
 #
+testcase=$1
 workpath=__runner__
 
 rm -rf $workpath

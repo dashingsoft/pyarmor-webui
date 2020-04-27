@@ -20,3 +20,4 @@ Generate Expired License
 
     Click Aside Menu    My Licenses
     Page Should Contain    Extra data
+    [Teardown]    Close Browser

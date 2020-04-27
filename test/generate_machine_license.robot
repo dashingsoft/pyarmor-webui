@@ -23,3 +23,4 @@ Generate Expired License
 
     Click Aside Menu    My Licenses
     Page Should Contain    ${HARDDISK}
+    [Teardown]    Close Browser

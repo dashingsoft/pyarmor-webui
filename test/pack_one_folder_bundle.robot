@@ -25,7 +25,7 @@ Pack Script To One Folder
     Select Script    main.py
     Click Button    Pack
     Wait Until Building End
-    Page Should Contain    Pack the obfuscated script successfully
+    Page Should Contain    Pack obfuscated scripts successfully
 
     Should Exist    ${FINAL BUNDLE}
     ${output}=    Run    ${FINAL BUNDLE}

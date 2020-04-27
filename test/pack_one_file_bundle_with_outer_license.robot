@@ -33,7 +33,7 @@ Pack One File Bundle With Outer License
     Input Bundle Name    myapp
     Click Button    Pack
     Wait Until Building End
-    Page Should Contain    Pack the obfuscated script successfully
+    Page Should Contain    Pack obfuscated scripts successfully
 
     Should Exist    ${FINAL BUNDLE}
     ${rc} =    Run and Return RC    ${FINAL BUNDLE}
