@@ -49,6 +49,7 @@ Change Logs
 ~~~
 * Add 2 plugins `on`, `assert_armored` in the plugin selection list
 * Fix python 2.7 failed issue: `TypeError: super() takes at least 1 argument (0 given)`
+* Add chinese language only for UI
 
 0.9
 ~~~
