@@ -216,6 +216,8 @@ class ProjectHandler(BaseHandler):
 
         licfile = args.get('licenseFile')
         self._check_arg('license', licfile, types=str)
+        if licfile == 'false':
+            licfile = 'outer'
 
         bootstrap = args.get('bootstrapCode')
         self._check_arg('bootstrap code', bootstrap, valids=[0, 1, 2, 3])
@@ -259,7 +261,7 @@ class ProjectHandler(BaseHandler):
             'obf_mode': get_bool('obfMod'),
             'obf_code': get_bool('obfCode'),
             'wrap_mode': get_bool('wrapMode'),
-            'advanced_mode': get_bool('advancedMode'),
+            'advanced_mode': args.get('advancedMode', 0),
             'enable_suffix': get_bool('enableSuffix'),
             'license_file': licfile,
             'package_runtime': get_bool('packageRuntime'),
@@ -330,7 +332,7 @@ class ProjectHandler(BaseHandler):
                 cmd_args.append(" %s" % (' '.join(options)))
             if name:
                 cmd_args.extend(['--name', name])
-            if target == 3 or args.get('licenseFile') == 'false':
+            if target == 3 or args.get('licenseFile') in ('false', 'outer'):
                 cmd_args.append('--without-license')
         else:
             cmd_args = ['build']

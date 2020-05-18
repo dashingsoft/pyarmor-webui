@@ -45,6 +45,13 @@ More Resources
 Change Logs
 -----------
 
+1.1
+~~~
+* In mode tab, `Advanced Mode` support 3 values:
+  - 0, disable advanced mode
+  - 1, enable advanced mode
+  - 2, enable super mode
+
 1.0
 ~~~
 * Add 2 plugins `on`, `assert_armored` in the plugin selection list
