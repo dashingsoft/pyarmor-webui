@@ -167,7 +167,7 @@ Project Fields
 | obfMod          | Boolean |   N    | Default is true |
 | obfCode         | Boolean |   N    | Default is true |
 | wrapMode        | Boolean |   N    | Default is true |
-| advancedMode    | Boolean |   N    | Default is false |
+| advancedMode    | Enum    |   N    | (0, 1, 2)       |
 | enableSuffix    | Boolean |   N    | Default is false |
 | noRuntime       | Boolean |   N    | Default is false |
 
@@ -259,7 +259,7 @@ Build a project
 
 URL
 
-    http://localhost:9096/project/new
+    http://localhost:9096/project/build
 
 Method: POST
 
