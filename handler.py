@@ -222,6 +222,11 @@ class ProjectHandler(BaseHandler):
         bootstrap = args.get('bootstrapCode')
         self._check_arg('bootstrap code', bootstrap, valids=[0, 1, 2, 3])
 
+        obfcode = args.get('obfCode')
+        if obfcode is True:
+            obfcode = 1
+        self._check_arg('obfCode', obfcode, valids=[0, 1, 2])
+
         platforms = args.get('platforms', [])
         self._check_arg('platforms', platforms, types=list)
 
@@ -259,7 +264,7 @@ class ProjectHandler(BaseHandler):
             'cross_protection': get_bool('crossProtection'),
             'restrict_mode': args.get('restrictMode', 2),
             'obf_mode': get_bool('obfMod'),
-            'obf_code': get_bool('obfCode'),
+            'obf_code': obfcode,
             'wrap_mode': get_bool('wrapMode'),
             'advanced_mode': args.get('advancedMode', 0),
             'enable_suffix': get_bool('enableSuffix'),
@@ -320,6 +325,7 @@ class ProjectHandler(BaseHandler):
             pack = args.get('pack', [])
             self._check_arg('pack', pack, types=list)
             options = self._handle_pack_options(args.get('src'), pack)
+            options.extend('--workpath', os.path.join(path, 'build'))
             if target in (2, 3):
                 options.append('--onefile')
             if target == 3:
