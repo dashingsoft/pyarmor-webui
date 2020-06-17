@@ -325,7 +325,6 @@ class ProjectHandler(BaseHandler):
             pack = args.get('pack', [])
             self._check_arg('pack', pack, types=list)
             options = self._handle_pack_options(args.get('src'), pack)
-            options.extend('--workpath', os.path.join(path, 'build'))
             if target in (2, 3):
                 options.append('--onefile')
             if target == 3:
