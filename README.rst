@@ -45,6 +45,13 @@ More Resources
 Change Logs
 -----------
 
+1.2
+~~~
+* In mode tab, `Obfuscate Code Object` support 3 values:
+  - 0, no obfuscate functions in module
+  - 1, obfuscate each function by quick algorithm
+  - 2, obfuscate each function by complex algorithm
+
 1.1
 ~~~
 * In mode tab, `Advanced Mode` support 3 values:
