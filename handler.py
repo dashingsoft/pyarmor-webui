@@ -76,6 +76,9 @@ class BaseHandler(object):
         if not os.path.exists(path):
             raise RuntimeError('This path %s does not exists' % path)
 
+    def _format_path(self, path):
+        return path.strip('/') if sys.platform == 'win32' else path
+
     def _get_path(self):
         c = self._config
         return os.path.join(c['homepath'], self.name + 's')
@@ -160,9 +163,13 @@ class DirectoryHandler(BaseHandler):
                 result = []
                 for i in range(26):
                     if drives & 1:
-                        result.append(chr(i + 65) + ':\\')
+                        result.append(chr(i + 65) + ':')
                     drives >>= 1
-                return [(x, 1) for x in result]
+                return {
+                    'path': path,
+                    'dirs': result,
+                    'files': []
+                }
             if path[0] == '/':
                 path = path[1:]
 
@@ -204,7 +211,7 @@ class ProjectHandler(BaseHandler):
         self.name = 'project'
 
     def _build_data(self, args):
-        src = args.get('src')
+        src = self._format_path(args.get('src'))
         self._check_arg('src', src, types=str)
         self._check_path(src)
 
@@ -277,9 +284,9 @@ class ProjectHandler(BaseHandler):
         for k in ('name', 'title'):
             data[k] = args.get(k)
 
-        output = args.get('output')
+        output = self._format_path(args.get('output'))
         if not output:
-            data['output'] = os.path.join(args.get('src'), 'dist')
+            data['output'] = os.path.join(src, 'dist')
 
         return data
 
@@ -315,16 +322,17 @@ class ProjectHandler(BaseHandler):
         target = args.get('buildTarget')
         self._check_arg('target', target, valids=[0, 1, 2, 3])
 
+        src = self._format_path(args.get('src'))
         name = args.get('bundleName')
-        output = args.get('output')
+        output = self._format_path(args.get('output'))
         if not output:
-            output = os.path.join(args.get('src'), 'dist')
+            output = os.path.join(src, 'dist')
 
         if target:
             cmd_args = ['pack']
             pack = args.get('pack', [])
             self._check_arg('pack', pack, types=list)
-            options = self._handle_pack_options(args.get('src'), pack)
+            options = self._handle_pack_options(src, pack)
             if target in (2, 3):
                 options.append('--onefile')
             if target == 3:
@@ -504,7 +512,7 @@ class LicenseHandler(BaseHandler):
 
     def _create(self, args, update=False):
         path = self._get_path()
-        output = args.get('output', path)
+        output = self._format_path(args.get('output', path))
 
         rcode = args['rcode']
         filename = os.path.join(output, rcode, 'license.lic')
@@ -567,7 +575,7 @@ class RuntimeHandler(BaseHandler):
 
     def do_new(self, args):
         cmd_args = ['runtime']
-        output = args.get('output', self._get_path())
+        output = self._format_path(args.get('output', self._get_path()))
         cmd_args.extend(['--output', output])
 
         for x in ('platform', 'mode', 'with_license'):

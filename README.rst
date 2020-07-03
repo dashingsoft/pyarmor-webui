@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.1
+~~~~~
+* Fix Windows issue: there is no drive list when selecting source path from `/`
+
 1.2
 ~~~
 * In mode tab, `Obfuscate Code Object` support 3 values:
