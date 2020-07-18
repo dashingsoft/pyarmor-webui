@@ -11,7 +11,6 @@ setup(
     description='A webui tool used to obfuscate and pack python scripts based on pyarmor',
     long_description=long_description,
     license="MIT License",
-    license_file='LICENSE',
     url='https://github.com/dashingsoft/pyarmor-webui',
     author='Jondy Zhao',
     author_email='jondy.zhao@gmail.com',
