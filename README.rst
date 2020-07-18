@@ -45,6 +45,14 @@ More Resources
 Change Logs
 -----------
 
+1.2.2
+~~~~~
+* In mode tab, `Advanced Mode` support 2 extra values:
+  - 3, enable vm mode and advanced mode
+  - 4, enable vm mode and super mode
+* When registering PyArmor, if there is a file `pyarmor-regfile-1.zip` is in the
+  current path, not select any file, just click register directly
+
 1.2.1
 ~~~~~
 * Fix Windows issue: there is no drive list when selecting source path from `/`
