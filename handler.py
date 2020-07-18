@@ -127,6 +127,9 @@ class RootHandler(BaseHandler):
         }
 
     def do_register(self, regfile):
+        if not regfile:
+            for regfile in glob.glob('pyarmor-regfile-*.zip'):
+                break
         self._check_arg('file', regfile)
         self._check_path(regfile)
         cmd_args = ['register', os.path.expandvars(regfile)]
@@ -234,6 +237,8 @@ class ProjectHandler(BaseHandler):
             obfcode = 1
         self._check_arg('obfCode', obfcode, valids=[0, 1, 2])
 
+        obfmod = 2 if args.get('obfMod') is True else 0
+
         platforms = args.get('platforms', [])
         self._check_arg('platforms', platforms, types=list)
 
@@ -270,7 +275,7 @@ class ProjectHandler(BaseHandler):
             'plugins': [x for x in plugins],
             'cross_protection': get_bool('crossProtection'),
             'restrict_mode': args.get('restrictMode', 2),
-            'obf_mode': get_bool('obfMod'),
+            'obf_mod': obfmod,
             'obf_code': obfcode,
             'wrap_mode': get_bool('wrapMode'),
             'advanced_mode': args.get('advancedMode', 0),
