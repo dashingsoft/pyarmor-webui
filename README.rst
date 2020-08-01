@@ -45,13 +45,24 @@ More Resources
 Change Logs
 -----------
 
+1.2.3
+~~~~~
+* Add new platform catalog `VM Protection` with 2 platforms:
+  - windows.x86_64.25
+  - windows.x86.25
+* Rename platform `alpine.*` to `musl.*`
+* Add new platforms:
+  - musl.mips32
+  - linux.mips64
+  - linux.mips64el
+
 1.2.2
 ~~~~~
 * In mode tab, `Advanced Mode` support 2 extra values:
   - 3, enable vm mode and advanced mode
   - 4, enable vm mode and super mode
 * When registering PyArmor, if there is a file `pyarmor-regfile-1.zip` is in the
-  current path, not select any file, just click register directly
+  current path, need not select any file, just click register directly
 
 1.2.1
 ~~~~~
