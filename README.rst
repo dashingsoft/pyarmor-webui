@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.5
+~~~~~
+* Fix issue: the relative path in extra pack options may not work
+
 1.2.4
 ~~~~~
 * Fix issue: the icon with absolute path could not be found in Windows
