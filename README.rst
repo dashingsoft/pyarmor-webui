@@ -48,6 +48,7 @@ Change Logs
 1.2.4
 ~~~~~
 * Fix issue: the icon with absolute path could not be found in Windows
+* Fix select Src issue in Windows
 
 1.2.3
 ~~~~~

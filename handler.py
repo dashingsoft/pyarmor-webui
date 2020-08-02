@@ -171,8 +171,17 @@ class DirectoryHandler(BaseHandler):
                     'dirs': result,
                     'files': []
                 }
+            if path == '@':
+                return {
+                    'path': path,
+                    'dirs': ['/',
+                             '/' + os.path.expanduser('~').replace('\\', '/')],
+                    'files': []
+                }
             if path[0] == '/':
                 path = path[1:]
+            if len(path) == 2 and path[1] == ':':
+                path += '/'
 
         if path == '@':
             return {
