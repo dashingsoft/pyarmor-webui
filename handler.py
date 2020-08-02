@@ -2,7 +2,6 @@ import glob
 import logging
 import json
 import os
-import re
 import shutil
 import sys
 
@@ -20,10 +19,7 @@ def quote_path(s):
     if not s:
         return "''"
     s = s.replace('\\', '/')
-
-    if re.compile(r'[^\w]', re.ASCII).search(s) is None:
-        return s
-    return "'%s'" % s
+    return ("'%s'" % s) if s.find(' ') > -1 else s
 
 
 def call_pyarmor(args):
@@ -311,7 +307,7 @@ class ProjectHandler(BaseHandler):
         i = 0
         n = len(result)
         while i < n:
-            v = result[i]
+            v = str(result[i])
             if v in ('--onefile', '-F', '--onefolder', '-D', '--name', '-N',
                      '--noconfirm', '-y', '--distpath', '--specpath'):
                 raise RuntimeError('Option "%s" could not be used here' % v)
@@ -319,14 +315,14 @@ class ProjectHandler(BaseHandler):
                 i += 1
                 if result[i].find(os.pathsep) == -1:
                     result[i] += os.pathsep + '.'
-                if not os.path.abspath(result[i]):
+                if not os.path.isabs(result[i]):
                     result[i] = os.path.join(src, result[i])
                 result[i] = quote_path(result[i])
             elif v in ('-i', '--icon', '-p', '--paths', '--runtime-hook',
                        '--additional-hooks-dir', '--version-file',
                        '-m', '--manifest', '-r', '--resource'):
                 i += 1
-                if not os.path.abspath(result[i]):
+                if not os.path.isabs(result[i]):
                     result[i] = os.path.join(src, result[i])
                 result[i] = quote_path(result[i])
             i += 1
