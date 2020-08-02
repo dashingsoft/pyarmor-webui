@@ -16,16 +16,14 @@ from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
 from pyarmor.project import Project
 
 
-def quote(s):
-    """Return a shell-escaped version of the string *s*."""
+def quote_path(s):
     if not s:
         return "''"
-    if re.compile(r'[^\w@%+=:,./-]', re.ASCII).search(s) is None:
-        return s
+    s = s.replace('\\', '/')
 
-    # use single quotes, and put single quotes into double quotes
-    # the string $'b is then quoted as '$'"'"'b'
-    return "'" + s.replace("'", "'\"'\"'") + "'"
+    if re.compile(r'[^\w]', re.ASCII).search(s) is None:
+        return s
+    return "'%s'" % s
 
 
 def call_pyarmor(args):
@@ -314,12 +312,14 @@ class ProjectHandler(BaseHandler):
                     result[i] += os.pathsep + '.'
                 if not os.path.abspath(result[i]):
                     result[i] = os.path.join(src, result[i])
+                result[i] = quote_path(result[i])
             elif v in ('-i', '--icon', '-p', '--paths', '--runtime-hook',
                        '--additional-hooks-dir', '--version-file',
                        '-m', '--manifest', '-r', '--resource'):
                 i += 1
                 if not os.path.abspath(result[i]):
                     result[i] = os.path.join(src, result[i])
+                result[i] = quote_path(result[i])
             i += 1
         return result
 
@@ -346,7 +346,7 @@ class ProjectHandler(BaseHandler):
                 options.append(os.path.join(p, 'data', 'copy_license.py'))
             if options:
                 cmd_args.append('--options')
-                options.extend(['--additional-hooks-dir', quote(path)])
+                options.extend(['--additional-hooks-dir', quote_path(path)])
                 cmd_args.append(" %s" % (' '.join(options)))
             if name:
                 cmd_args.extend(['--name', name])
