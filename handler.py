@@ -15,13 +15,6 @@ from pyarmor.pyarmor import (main as pyarmor_main, pytransform_bootstrap,
 from pyarmor.project import Project
 
 
-def quote_path(s):
-    if not s:
-        return "''"
-    s = s.replace('\\', '/')
-    return ("'%s'" % s) if s.find(' ') > -1 else s
-
-
 def call_pyarmor(args):
     logging.info('Call pyarmor: %s', args)
     pyarmor_main(args)
@@ -306,6 +299,13 @@ class ProjectHandler(BaseHandler):
                     result.extend(x.split('=', 1) if x.find('=') > 0 else [x])
         i = 0
         n = len(result)
+
+        def _quote_path(s):
+            if not os.path.isabs(s):
+                s = os.path.join(src, s)
+            s = s.replace('\\', '/')
+            return ("'%s'" % s) if s.find(' ') > -1 else s
+
         while i < n:
             v = str(result[i])
             if v in ('--onefile', '-F', '--onefolder', '-D', '--name', '-N',
@@ -315,16 +315,12 @@ class ProjectHandler(BaseHandler):
                 i += 1
                 if result[i].find(os.pathsep) == -1:
                     result[i] += os.pathsep + '.'
-                if not os.path.isabs(result[i]):
-                    result[i] = os.path.join(src, result[i])
-                result[i] = quote_path(result[i])
+                result[i] = _quote_path(result[i])
             elif v in ('-i', '--icon', '-p', '--paths', '--runtime-hook',
                        '--additional-hooks-dir', '--version-file',
                        '-m', '--manifest', '-r', '--resource'):
                 i += 1
-                if not os.path.isabs(result[i]):
-                    result[i] = os.path.join(src, result[i])
-                result[i] = quote_path(result[i])
+                result[i] = _quote_path(result[i])
             i += 1
         return result
 
@@ -351,7 +347,6 @@ class ProjectHandler(BaseHandler):
                 options.append(os.path.join(p, 'data', 'copy_license.py'))
             if options:
                 cmd_args.append('--options')
-                options.extend(['--additional-hooks-dir', quote_path(path)])
                 cmd_args.append(" %s" % (' '.join(options)))
             if name:
                 cmd_args.extend(['--name', name])
