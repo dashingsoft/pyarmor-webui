@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.4
+~~~~~
+* Fix issue: the icon with absolute path could not be found in Windows
+
 1.2.3
 ~~~~~
 * Add new platform catalog `VM Protection` with 2 platforms:
