@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.6
+~~~~~
+* Add restrict mode 5
+
 1.2.5
 ~~~~~
 * Fix issue: the relative path in extra pack options may not work
