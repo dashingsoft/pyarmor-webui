@@ -1,3 +1,4 @@
+from sys import platform
 from setuptools import setup
 
 __version__ = '1.2.6'
@@ -62,5 +63,6 @@ setup(
         ],
     },
 
-    install_requires=['pyarmor>=6.4.0'],
+    install_requires=['pyarmor>=6.4.0'] + (
+        ['win32api'] if platform == 'win32' else []),
 )

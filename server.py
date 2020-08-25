@@ -35,6 +35,19 @@ __config__ = {
 }
 
 
+def _fix_up_win_console_freeze():
+    import win32api
+    import ctypes
+    try:
+        win32api.SetConsoleTitle("Pyarmor Webui")
+        # Disable quick edit in CMD, as it can freeze the application
+        handle = win32api.GetStdHandle(-10)
+        if handle != -1 and handle is not None:
+            ctypes.windll.kernel32.SetConsoleMode(handle, 128)
+    except Exception:
+        pass
+
+
 class HelperHandler(BaseHTTPRequestHandler):
 
     server_version = "HelperHTTP/" + __version__
@@ -227,6 +240,9 @@ def main(argv=None):
     if args.data_path:
         __config__['homepath'] = args.data_path
     logging.info("Data path: %s", __config__['homepath'])
+
+    if sys.platform == 'win32':
+        _fix_up_win_console_freeze()
 
     server = socketserver.TCPServer((args.host, args.port), HelperHandler)
     logging.info("Serving HTTP on %s port %s ...", *server.server_address)

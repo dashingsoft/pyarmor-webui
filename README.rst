@@ -48,6 +48,7 @@ Change Logs
 1.2.6
 ~~~~~
 * Add restrict mode 5
+* For Windows disable quick edit in CMD, as it can freeze the application
 
 1.2.5
 ~~~~~
