@@ -1,7 +1,7 @@
 from sys import platform
 from setuptools import setup
 
-__version__ = '1.2.6'
+__version__ = '1.2.7'
 
 with open('README.rst') as f:
     long_description = f.read()

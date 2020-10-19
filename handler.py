@@ -344,7 +344,12 @@ class ProjectHandler(BaseHandler):
             if target == 3:
                 options.append('--runtime-hook')
                 p = os.path.dirname(os.path.abspath(__file__))
-                options.append(os.path.join(p, 'data', 'copy_license.py'))
+                if p.find(' ') > -1:
+                    s = "'%s'" % os.path.join(p, 'data', 'copy_license.py')
+                else:
+                    s = os.path.join(p, 'data', 'copy_license.py')
+                options.append(s.replace('\\', '/'))
+
             if options:
                 cmd_args.append('--options')
                 cmd_args.append(" %s" % (' '.join(options)))

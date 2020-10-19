@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.7
+~~~~~
+* Fix bug (#3): mode `pack all to one file with outer license` failed.
+
 1.2.6
 ~~~~~
 * Add restrict mode 5
