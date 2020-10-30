@@ -6,7 +6,7 @@ Documentation     A single test to generate expired license.
 Resource          resource.robot
 
 *** Variables ***
-${EXPIRED}               2020-10-15
+${EXPIRED}               2021-10-15
 
 *** Test Cases ***
 Generate Expired License
