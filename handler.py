@@ -115,11 +115,13 @@ class RootHandler(BaseHandler):
 
     def do_register(self, regfile):
         if not regfile:
-            for regfile in glob.glob('pyarmor-regfile-*.zip'):
+            for regfile in glob.glob('pyarmor-regfile*.zip'):
                 break
-        self._check_arg('file', regfile)
-        self._check_path(regfile)
-        cmd_args = ['register', os.path.expandvars(regfile)]
+        if regfile.endswith('.zip'):
+            self._check_arg('file', regfile)
+            self._check_path(regfile)
+            regfile = os.path.expandvars(regfile).replace('\\', '/')
+        cmd_args = ['register', regfile]
         call_pyarmor(cmd_args)
         return self.do_version()
 
