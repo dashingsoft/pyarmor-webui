@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.8
+~~~~~
+* In register dialog, it also supports to register a code.
+
 1.2.7
 ~~~~~
 * Fix bug (#3): mode `pack all to one file with outer license` failed.
