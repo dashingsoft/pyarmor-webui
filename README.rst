@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.2.9
+~~~~~
+* Add new platforms: darwin.aarch64.3, android.armv7, android.x86_64, android.x86
+
 1.2.8
 ~~~~~
 * In register dialog, it also supports to register a code.
