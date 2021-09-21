@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.3.1
+~~~~~
+* Add restrict mode 101, 102, 103, 104, 105
+
 1.2.9
 ~~~~~
 * Add new platforms: darwin.aarch64.3, android.armv7, android.x86_64, android.x86
