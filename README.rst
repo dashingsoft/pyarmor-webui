@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.3.2
+~~~~~
+* Add advanced mode 5
+
 1.3.1
 ~~~~~
 * Add restrict mode 101, 102, 103, 104, 105
