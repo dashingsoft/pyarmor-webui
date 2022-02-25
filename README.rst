@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.3.3
+~~~~~
+* Fix typos
+
 1.3.2
 ~~~~~
 * Add advanced mode 5
