@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.4.0
+~~~~~
+* Add new option `--mix-str`
+
 1.3.3
 ~~~~~
 * Fix typos

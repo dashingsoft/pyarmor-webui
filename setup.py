@@ -1,7 +1,7 @@
 from sys import platform
 from setuptools import setup
 
-__version__ = '1.3.3'
+__version__ = '1.4.0'
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -14,7 +14,7 @@ setup(
     license="MIT License",
     url='https://github.com/dashingsoft/pyarmor-webui',
     author='Jondy Zhao',
-    author_email='jondy.zhao@gmail.com',
+    author_email='pyarmor@163.com',
 
     # For a list of valid classifiers, see
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -63,6 +63,6 @@ setup(
         ],
     },
 
-    install_requires=['pyarmor>=7.0.1'] + (
+    install_requires=['pyarmor>=7.6.0'] + (
         ['pywin32'] if platform == 'win32' else []),
 )
