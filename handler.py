@@ -243,6 +243,9 @@ class ProjectHandler(BaseHandler):
         plugins = args.get('plugins', [])
         self._check_arg('plugins', plugins, types=list)
 
+        mixins = args.get('mixins')
+        mixins = ['str'] if mixins is True else [] if not mixins else mixins
+
         include = args.get('include')
         self._check_arg('include', include,
                         valids=['exact', 'list', 'all'])
@@ -282,6 +285,7 @@ class ProjectHandler(BaseHandler):
             'package_runtime': get_bool('packageRuntime'),
             'bootstrap_code': bootstrap,
             'is_package': 0,
+            'mixins': mixins,
         }
 
         for k in ('name', 'title'):
