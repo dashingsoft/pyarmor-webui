@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+1.4.1
+~~~~~
+* Change install_requires to `pyarmor~=7.6.0` because it doesn't work with Pyarmor 8.0+
+
 1.4.0
 ~~~~~
 * Add new option `--mix-str`
