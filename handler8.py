@@ -9,7 +9,6 @@ from subprocess import Popen
 from tempfile import TemporaryDirectory
 
 from pyarmor.pyarmor import version as pyarmor_version
-from pyarmor.project import Project
 
 from pyarmor.cli.context import Context
 from pyarmor.cli.register import Register
@@ -17,23 +16,15 @@ from pyarmor.cli.__main__ import main_entry as pyarmor_main
 
 
 try:
-    from .handler import BaseHandler, DirectoryHandler, \
-        call_pyarmor as call_pyarmor7
+    from .handler import BaseHandler, DirectoryHandler
 except Exception:
-    from handler import BaseHandler, DirectoryHandler, \
-        call_pyarmor as call_pyarmor7
+    from handler import BaseHandler, DirectoryHandler
 
-
-BCC_MODE_FLAG = 1
-RFT_MODE_FLAG = 2
 
 DEFAULT_RESTRICT_FLAG = 1
 PRIVATE_MODULE_FLAG = 2
 RESTRICT_PACKAGE_FLAG = 4
 NO_RESTRICT_FLAG = 8
-
-ASSERT_CALL_FLAG = 256
-ASSERT_IMPORT_FLAG = 512
 
 
 def enter_temp_path(func):
@@ -57,6 +48,12 @@ def call_pyinstaller(options):
         raise RuntimeError('Build bundle failed (%s)' % p.returncode)
 
 
+def call_pyarmor(args, homepath=None, debug=False):
+    logging.info('Call pyarmor: %s', args)
+    extra_opts = ['--home', homepath] + (['-d'] if debug else [])
+    pyarmor_main(extra_opts + args)
+
+
 class RootHandler(BaseHandler):
 
     def __init__(self, config):
@@ -70,11 +67,6 @@ class RootHandler(BaseHandler):
     @property
     def homepath(self):
         return self._config['homepath']
-
-    def call_pyarmor(self, args, debug=False):
-        logging.info('Call pyarmor: %s', args)
-        extra_opts = ['--home', self.homepath] + (['-d'] if debug else [])
-        pyarmor_main(extra_opts + args)
 
     def do_version(self, args=None):
         ctx = Context(self.homepath)
@@ -106,7 +98,7 @@ class RootHandler(BaseHandler):
                 if int(filename[-8:-4].isdigit()) < 4000:
                     cmd_args.append('-u')
         cmd_args.append(filename)
-        self.call_pyarmor(cmd_args)
+        call_pyarmor(cmd_args, homepath=self._config['homepath'])
 
         if is_initial:
             regfiles = glob.glob('pyarmor-reg*.zip')
@@ -146,18 +138,6 @@ class ProjectHandler(BaseHandler):
         bootstrap = args.get('bootstrapCode')
         self._check_arg('bootstrap code', bootstrap, valids=[0, 1, 2, 3])
 
-        advanced_mode = args.get('advancedMode', 0)
-        if args.get('bccMode'):
-            advanced_mode |= BCC_MODE_FLAG
-        if args.get('rftMode'):
-            advanced_mode |= RFT_MODE_FLAG
-
-        restrict_mode = args.get('restrictMode', 2)
-        if args.get('assertCall'):
-            restrict_mode |= ASSERT_CALL_FLAG
-        if args.get('assertImport'):
-            restrict_mode |= ASSERT_IMPORT_FLAG
-
         obfcode = args.get('obfCode')
         if obfcode is True:
             obfcode = 1
@@ -178,8 +158,6 @@ class ProjectHandler(BaseHandler):
         self._check_arg('include', include,
                         valids=['exact', 'list', 'all'])
 
-        manifest = [include] + exclude
-
         if licfile and not licfile.endswith('pyarmor.rkey'):
             licfile = None
 
@@ -188,16 +166,16 @@ class ProjectHandler(BaseHandler):
 
         data = {
             'src': src,
-            'manifest': ','.join(manifest),
+            'manifest': None,
             'entry': ','.join(entry),
             'platform': ','.join([x[-1] for x in platforms]),
             'plugins': [x for x in plugins],
             'cross_protection': get_bool('crossProtection'),
-            'restrict_mode': restrict_mode,
+            'restrict_mode': args.get('restrictMode', 1),
             'obf_mod': obfmod,
             'obf_code': obfcode,
             'wrap_mode': get_bool('wrapMode'),
-            'advanced_mode': advanced_mode,
+            'advanced_mode': args.get('advancedMode', 0),
             'enable_suffix': get_bool('enableSuffix'),
             'license_file': licfile,
             'package_runtime': get_bool('packageRuntime'),
@@ -250,6 +228,8 @@ class ProjectHandler(BaseHandler):
 
     @enter_temp_path
     def _build_target(self, path, args, debug=False):
+        homepath = self._config['homepath']
+
         target = args.get('buildTarget')
         self._check_arg('target', target, valids=[0, 1, 2, 3])
 
@@ -258,29 +238,32 @@ class ProjectHandler(BaseHandler):
         output = self._format_path(args.get('output'))
         if not output:
             output = os.path.join(src, 'dist')
-        entries = args.get('entry').split(',')
+        entries = args.get('entry', [])
+        cmd_args = ['gen']
 
         if target:
             pack = args.get('pack', [])
             self._check_arg('pack', pack, types=list)
-            options = self._handle_pack_options(src, pack)
-
-            ename = name if name else entries[0].splitext()[0]
-            bundle = ename + ('.exe' if sys.platform.startswith('win') else '')
+            pyi_options = self._handle_pack_options(src, pack)
+            binext = '.exe' if sys.platform.startswith('win') else ''
+            entryname = name if name else os.path.splitext(entries[0])[0]
+            bundle = entryname + binext
+            distpath = os.path.basename(output)
             if target in (2, 3):
-                options.append('--onefile')
-                cmd_args = ['--pack', os.path.join('dist', bundle)]
+                pyi_options.append('--onefile')
+                distfile = os.path.join(distpath, bundle)
             else:
-                cmd_args = ['--pack', os.path.join('dist', ename, bundle)]
+                distfile = os.path.join(distpath, entryname, bundle)
+            pyi_options.extend(['--distpath', distpath])
+            cmd_args.extend(['--pack', distfile])
 
             if name:
-                options.extend(['--name', name])
+                pyi_options.extend(['--name', name])
 
-            options.append(os.path.join(src, entries[0]))
-            call_pyinstaller(options)
+            pyi_options.append(os.path.join(src, entries[0]))
+            call_pyinstaller(pyi_options)
 
         else:
-            cmd_args = []
             if args.get('noRuntime'):
                 cmd_args.append('--no-runtime')
 
@@ -289,43 +272,62 @@ class ProjectHandler(BaseHandler):
 
             cmd_args.extend(['--output', output])
 
-        restrict_mode = args.get('restrict_mode', DEFAULT_RESTRICT_FLAG)
+        restrict_mode = args.get('restrictMode', DEFAULT_RESTRICT_FLAG)
         if restrict_mode & NO_RESTRICT_FLAG:
-            self.call_pyarmor(['cfg', 'restrict_module', '0'])
+            call_pyarmor(['cfg', 'restrict_module', '0'], homepath=homepath)
         if restrict_mode & RESTRICT_PACKAGE_FLAG:
             cmd_args.append('--restrict')
         elif restrict_mode & PRIVATE_MODULE_FLAG:
             cmd_args.append('--private')
-        if restrict_mode & ASSERT_CALL_FLAG:
+
+        if args.get('assertCall'):
             cmd_args.append('--assert-call')
-        if restrict_mode & ASSERT_IMPORT_FLAG:
+        if args.get('assertImport'):
             cmd_args.append('--assert-import')
 
-        advanced_mode = args.get('advanced_mode', 0)
-        if advanced_mode & BCC_MODE_FLAG:
+        if args.get('bccMode'):
             cmd_args.append('--enable-bcc')
-        if advanced_mode & RFT_MODE_FLAG:
+        if args.get('rftMode'):
             cmd_args.append('--enable-rft')
+        if args.get('mixStrings'):
+            cmd_args.append('--mix-str')
 
         if target == 3 or args.get('licenseFile') in ('false', 'outer'):
             cmd_args.append('--outer')
 
-        include = args.manifest[0]
-        if include == 'exact':
-            cmd_args.extend([os.path.join(src, x) for x in entries])
-        elif include == 'list':
-            cmd_args.extend([src])
-        else:
-            cmd_args.extend(['-r', src])
+        if args.get('plugins'):
+            plugins = ' '.join(args.get('plugins'))
+            call_pyarmor(['cfg', 'plugins', '+', plugins], homepath=homepath)
 
-        for x in args.manifest[1:]:
+        include = args.get('include', 'exact')
+        excludes = args.get('exclude', [])
+
+        for x in excludes:
             cmd_args.extend(['--exclude', os.path.join('*', x)])
 
-        self.call_pyarmor(cmd_args, debug=debug)
+        if include == 'exact':
+            cmd_args.extend([os.path.join(src, x) for x in entries])
+        else:
+            inputs = [(x.is_file(), x.path) for x in os.scandir(src)
+                      if x not in excludes and not x.name.startswith('.')]
+            if include == 'all':
+                cmd_args.append('-r')
+                cmd_args.extend([b for a, b in inputs if not a])
+            cmd_args.extend([b for a, b in inputs if a and b.endswith('.py')])
+
+        call_pyarmor(cmd_args, homepath=homepath, debug=debug)
+        if target:
+            if os.path.exists(output):
+                if len(output) < 4:
+                    # Do not rmtree too short path
+                    raise RuntimeError('Output path "%s" is not empty', output)
+                logging.info('Clean output path "%s"', output)
+                shutil.rmtree(output)
+            shutil.move(distpath, output)
         return output
 
     def _build_temp(self, args, debug=False):
-        data = self._build_data(args)
+        self._build_data(args)
 
         name = 'project-%s' % self.temp_id
         path = os.path.join(self._get_path(), name)
@@ -333,15 +335,6 @@ class ProjectHandler(BaseHandler):
         if os.path.exists(path):
             shutil.rmtree(path)
         os.mkdir(path)
-
-        cmd_args = ['init', '--src', data['src'], path]
-        call_pyarmor7(cmd_args)
-
-        project = Project()
-        project.open(path)
-
-        project._update(data)
-        project.save(path)
 
         return self._build_target(path, args, debug=debug)
 
@@ -363,15 +356,7 @@ class ProjectHandler(BaseHandler):
         args['path'] = path
         if not args.get('title', ''):
             args['title'] = os.path.basename(args.get('src'))
-        data = self._build_data(args)
-
-        cmd_args = ['init', '--src', data['src'], path]
-        call_pyarmor7(cmd_args)
-
-        project = Project()
-        project.open(path)
-        project._update(data)
-        project.save(path)
+        self._build_data(args)
 
         c['projects'].append(args)
         c['counter'] = n
@@ -381,17 +366,11 @@ class ProjectHandler(BaseHandler):
         return args
 
     def do_update(self, args):
-        data = self._build_data(args)
+        self._build_data(args)
 
         c, p = self._get_project(args)
         p.update(args)
         self._set_config(c)
-
-        path = self._get_project_path(p)
-        project = Project()
-        project.open(path)
-        project._update(data)
-        project.save(path)
 
         logging.info('Update project: %s', p)
         return p
@@ -486,13 +465,15 @@ class LicenseHandler(BaseHandler):
         for name, opt in self.options.items():
             if name in args:
                 v = args.get(name)
-                if opt:
-                    cmd_args.extend([opt, v])
-                else:
-                    device.append(v)
+                if v:
+                    if opt:
+                        cmd_args.extend([opt, v])
+                    else:
+                        device.append(v)
         if device:
             cmd_args.extend(['-b', ' '.join(device)])
-        self.call_pyarmor(cmd_args)
+
+        call_pyarmor(cmd_args, homepath=self._config['homepath'])
         return filename
 
     def do_update(self, args):
