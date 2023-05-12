@@ -22,10 +22,13 @@ except ImportError:
 
 try:
     from .handler import RootHandler
+    from .handler8 import RootHandler as RootHandler8
 except Exception:
-    from handler import RootHandler
+    from .handler import RootHandler
+    from .handler8 import RootHandler as RootHandler8
 
-__version__ = '1.4.0'
+
+__version__ = '2.0'
 
 __config__ = {
     'version': __version__,
@@ -51,7 +54,7 @@ def _fix_up_win_console_freeze():
 class HelperHandler(BaseHTTPRequestHandler):
 
     server_version = "HelperHTTP/" + __version__
-    root_handler = RootHandler(__config__)
+    root_handler = RootHandler8(__config__)
 
     def do_OPTIONS(self):
         """Serve a OPTIONS request."""
@@ -231,6 +234,8 @@ def main(argv=None):
                         help='Bind host, default is localhost')
     parser.add_argument('-n', '--no-browser', action='store_true',
                         help='Do not open web browser')
+    parser.add_argument('-7', '--enable-v7', action='store_true',
+                        help='Force to use Pyarmor 7 commands')
     parser.add_argument('-i', '--index', default='',
                         help='Index page, default is index.html')
     parser.add_argument('--data-path',
@@ -238,8 +243,12 @@ def main(argv=None):
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     if args.data_path:
-        __config__['homepath'] = args.data_path
+        __config__['homepath'] = os.path.abspath(args.data_path)
     logging.info("Data path: %s", __config__['homepath'])
+
+    if args.enable_v7:
+        logging.info("Force to use Pyarmor 7 commands")
+        HelperHandler.root_handler = RootHandler(__config__)
 
     if sys.platform == 'win32':
         _fix_up_win_console_freeze()

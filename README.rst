@@ -48,6 +48,7 @@ Change Logs
 2.0
 ~~~~~
 * Support Pyarmor 8.0+
+* Add option `-7` to use Pyarmor 7 commands
 
 1.4.1
 ~~~~~
