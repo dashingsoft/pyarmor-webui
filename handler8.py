@@ -85,23 +85,27 @@ class RootHandler(BaseHandler):
 
     @enter_temp_path
     def do_register(self, args):
-        filename = args.filename
+        from base64 import urlsafe_b64decode
+        filename = args.get('filename')
         with open(filename, 'wb') as f:
-            f.write(args.filedata)
+            i = args['filedata'].find('base64,') + len('base64,')
+            f.write(urlsafe_b64decode(args['filedata'][i:]))
 
         cmd_args = ['reg']
         is_initial = filename.endswith('.txt')
         if is_initial:
             self._check_arg('product', args)
-            cmd_args.extend(['-p', args.product])
+            cmd_args.extend(['-p', args.get('product')])
             if filename[-8:-4].isdigit() and filename[-9] == '-':
-                if int(filename[-8:-4].isdigit()) < 4000:
+                if int(filename[-8:-4]) < 4000:
                     cmd_args.append('-u')
         cmd_args.append(filename)
         call_pyarmor(cmd_args, homepath=self._config['homepath'])
 
         if is_initial:
             regfiles = glob.glob('pyarmor-reg*.zip')
+            if not regfiles:
+                raise RuntimeError('Abort registration')
             os.makedirs(self.homepath, exist_ok=True)
             dest = os.path.join(self.homepath, regfiles[0])
             logging.info('Store registration file "%s"', dest)
@@ -422,9 +426,9 @@ class LicenseHandler(BaseHandler):
 
     template = 'reg-%06d'
     options = {
-        'harddisk': '',
-        'ipv4': '',
-        'mac': '',
+        'harddisk': '*HARDDISK:',
+        'ipv4': '*IFMAC:',
+        'mac': '*IFIPV4:',
         'expired': '--expired',
         'extraData': '--bind-data',
     }
@@ -465,13 +469,14 @@ class LicenseHandler(BaseHandler):
         for name, opt in self.options.items():
             if name in args:
                 v = args.get(name)
-                if v:
-                    if opt:
-                        cmd_args.extend([opt, v])
-                    else:
-                        device.append(v)
+                if not v:
+                    continue
+                if opt.startswith('-'):
+                    cmd_args.extend([opt, v])
+                else:
+                    device.append(opt + v)
         if device:
-            cmd_args.extend(['-b', ' '.join(device)])
+            cmd_args.extend(['-b', ''.join(device)])
 
         call_pyarmor(cmd_args, homepath=self._config['homepath'])
         return filename
