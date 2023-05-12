@@ -21,7 +21,7 @@ Open Browser To Home Page
     Home Page Should Be Open
 
 Home Page Should Be Open
-    Title Should Be    PyArmor
+    Title Should Be    Pyarmor
 
 Click Home Tab Button
     [Arguments]    ${title}
