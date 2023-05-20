@@ -1,6 +1,6 @@
-# PyArmor Server
+# Pyarmor Server
 
-This is a simple webserver for PyArmor WebUI.
+This is a simple webserver for Pyarmor WebUI.
 
 Start a web server on default port 9096 and open web browser:
 
@@ -18,7 +18,7 @@ No open web browser:
 
 ### /version
 
-Get version information of PyArmor, Server and Python
+Get version information of Pyarmor, Server and Python
 
 URL
 
@@ -34,10 +34,10 @@ Return
 
 | Name       | Type    | Length | Description |
 |------------|---------|--------|-------------|
-| version    | String  |        | PyArmor version |
-| regcode    | String  |        | PyArmor registration code, empty for trial version |
-| reginfo    | String  |        | PyArmor registration name and email |
-| server     | String  |        | PyArmor Server version |
+| version    | String  |        | Pyarmor version |
+| regcode    | String  |        | Pyarmor registration code, empty for trial version |
+| reginfo    | String  |        | Pyarmor registration name and email |
+| server     | String  |        | Pyarmor Server version |
 | python     | String  |        | Python version |
 
 For example
@@ -52,7 +52,7 @@ For example
 
 ### /register
 
-Register PyArmor with key file
+Register Pyarmor with key file
 
 URL
 
@@ -86,7 +86,7 @@ Arguments
 If path is `@`, return some favorite pathes, for example, User home
 path, My Documents etc.
 
-If path is empty, list the current path of PyArmor Server
+If path is empty, list the current path of Pyarmor Server
 
 Success: HTTP/1.1 200 OK
 
