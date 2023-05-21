@@ -45,6 +45,11 @@ More Resources
 Change Logs
 -----------
 
+2.1
+~~~~~
+* Fix registration need confirm in the console
+* Add language Japanese
+
 2.0
 ~~~~~
 * Support Pyarmor 8.0+
