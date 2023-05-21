@@ -28,7 +28,7 @@ except Exception:
     from .handler8 import RootHandler as RootHandler8
 
 
-__version__ = '2.0'
+__version__ = '2.1'
 
 __config__ = {
     'version': __version__,
@@ -39,14 +39,14 @@ __config__ = {
 
 
 def _fix_up_win_console_freeze():
-    import win32api
-    import ctypes
     try:
-        win32api.SetConsoleTitle("Pyarmor Webui")
+        from ctypes import windll
+        from win32api import GetStdHandle, SetConsoleTitle
+        SetConsoleTitle("Pyarmor Webui")
         # Disable quick edit in CMD, as it can freeze the application
-        handle = win32api.GetStdHandle(-10)
+        handle = GetStdHandle(-10)
         if handle != -1 and handle is not None:
-            ctypes.windll.kernel32.SetConsoleMode(handle, 128)
+            windll.kernel32.SetConsoleMode(handle, 128)
     except Exception:
         pass
 
