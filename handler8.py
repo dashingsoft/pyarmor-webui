@@ -95,7 +95,7 @@ class RootHandler(BaseHandler):
         is_initial = filename.endswith('.txt')
         if is_initial:
             self._check_arg('product', args)
-            cmd_args.extend(['-p', args.get('product')])
+            cmd_args.extend(['-y', '-p', args.get('product')])
             if filename[-8:-4].isdigit() and filename[-9] == '-':
                 if int(filename[-8:-4]) < 4000:
                     cmd_args.append('-u')
