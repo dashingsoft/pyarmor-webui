@@ -273,6 +273,8 @@ class ProjectHandler(BaseHandler):
 
             if name:
                 output = os.path.join(output, name)
+                if not args.get('noRuntime'):
+                    cmd_args.append('-i')
 
             cmd_args.extend(['--output', output])
 
@@ -296,7 +298,16 @@ class ProjectHandler(BaseHandler):
         if args.get('mixStrings'):
             cmd_args.append('--mix-str')
 
-        if target == 3 or args.get('licenseFile') in ('false', 'outer'):
+        licfile = args.get('licenseFile')
+        if target == 3 or licfile in ('false', 'outer'):
+            cmd_args.append('--outer')
+            licfile = None
+        elif licfile not in ('true', None, ''):
+            if licfile.endswith('license.lic'):
+                raise RuntimeError('This license file "%s" is not '
+                                   'for Pyarmor 8' % licfile)
+            if not os.path.exists(licfile):
+                raise RuntimeError('no found license file "%s"' % licfile)
             cmd_args.append('--outer')
 
         if args.get('plugins'):
@@ -328,6 +339,24 @@ class ProjectHandler(BaseHandler):
                 logging.info('Clean output path "%s"', output)
                 shutil.rmtree(output)
             shutil.move(distpath, output)
+
+        if licfile:
+            licpath = os.path.join(output, entryname if target == 1 else '')
+            if target not in (2, 3):
+                def is_runtime_package(p):
+                    names = os.listdir(p)
+                    return '__init__.py' in names and any([
+                        x.startswith('pyarmor_runtime.') for x in names])
+
+                for x in os.scandir(licpath):
+                    if x.is_dir() and x.startswith('pyarmor_runtime_'):
+                        if is_runtime_package(x.path):
+                            licpath = os.path.join(licpath, x.name)
+                            break
+                else:
+                    raise RuntimeError('no found runtime package')
+            shutil.copy2(licfile, licpath)
+
         return output
 
     def _build_temp(self, args, debug=False):
