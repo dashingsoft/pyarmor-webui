@@ -47,8 +47,13 @@ Change Logs
 
 2.1
 ~~~~~
-* Fix registration need confirm in the console
+New feature:
 * Add language Japanese
+
+Fix Pyarmor 8 issues:
+* Fix registration need confirm in the console
+* Fix license file doesn't work issue
+* Fix obfuscating package issues
 
 2.0
 ~~~~~
