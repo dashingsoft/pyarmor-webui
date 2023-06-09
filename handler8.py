@@ -272,9 +272,14 @@ class ProjectHandler(BaseHandler):
                 cmd_args.append('--no-runtime')
 
             if name:
-                output = os.path.join(output, name)
-                if not args.get('noRuntime'):
-                    cmd_args.append('-i')
+                cmd_args.append('-i')
+
+            if args.get('platforms'):
+                pnames = args.get('platforms')
+                if any([x.startswith('themida.') for x in pnames]):
+                    cmd_args.append('--enable-themida')
+                    pnames = [x.replace('themida', 'windows') for x in pnames]
+                cmd_args.extend(['--platform', ','.join(pnames)])
 
             cmd_args.extend(['--output', output])
 
@@ -301,7 +306,6 @@ class ProjectHandler(BaseHandler):
         licfile = args.get('licenseFile')
         if target == 3 or licfile in ('false', 'outer'):
             cmd_args.append('--outer')
-            licfile = None
         elif licfile not in ('true', None, ''):
             if licfile.endswith('license.lic'):
                 raise RuntimeError('This license file "%s" is not '
@@ -322,6 +326,10 @@ class ProjectHandler(BaseHandler):
 
         if include == 'exact':
             cmd_args.extend([os.path.join(src, x) for x in entries])
+        elif name and not target:
+            if include == 'all':
+                cmd_args.append('-r')
+            cmd_args.append(src)
         else:
             inputs = [(x.is_file(), x.path) for x in os.scandir(src)
                       if x not in excludes and not x.name.startswith('.')]
@@ -340,7 +348,7 @@ class ProjectHandler(BaseHandler):
                 shutil.rmtree(output)
             shutil.move(distpath, output)
 
-        if licfile:
+        if isinstance(licfile, str) and os.path.exists(licfile):
             licpath = os.path.join(output, entryname if target == 1 else '')
             if target not in (2, 3):
                 def is_runtime_package(p):
@@ -349,10 +357,10 @@ class ProjectHandler(BaseHandler):
                         x.startswith('pyarmor_runtime.') for x in names])
 
                 for x in os.scandir(licpath):
-                    if x.is_dir() and x.startswith('pyarmor_runtime_'):
-                        if is_runtime_package(x.path):
-                            licpath = os.path.join(licpath, x.name)
-                            break
+                    if x.is_dir() and x.name.startswith('pyarmor_runtime_') \
+                       and is_runtime_package(x.path):
+                        licpath = x.path
+                        break
                 else:
                     raise RuntimeError('no found runtime package')
             shutil.copy2(licfile, licpath)
