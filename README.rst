@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+2.2
+~~~~~
+* Change dependent pyarmor version to ">=8.2.2" when installed by pip.
+
 2.1
 ~~~~~
 New feature:
