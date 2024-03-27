@@ -42,6 +42,7 @@ def enter_temp_path(func):
 
 
 def call_pyinstaller(options):
+    logging.info('Call PyInstaller: %s', options)
     p = Popen([sys.executable, '-m', 'PyInstaller'] + options)
     p.wait()
     if p.returncode != 0:
@@ -261,6 +262,11 @@ class ProjectHandler(BaseHandler):
             pyi_options.extend(['--distpath', distpath])
             cmd_args.extend(['--pack', distfile])
 
+            if args.get('cleanOutput', False):
+                pyi_options.append('-y')
+            elif os.path.exists(output):
+                raise RuntimeError('Output "%s" is not empty' % output)
+
             if name:
                 pyi_options.extend(['--name', name])
 
@@ -343,9 +349,9 @@ class ProjectHandler(BaseHandler):
             if os.path.exists(output):
                 if len(output) < 4:
                     # Do not rmtree too short path
-                    raise RuntimeError('Output path "%s" is not empty', output)
+                    raise RuntimeError('Output "%s" is not empty' % output)
                 if not args.get('cleanOutput', False):
-                    raise RuntimeError('Output path "%s" is not empty', output)
+                    raise RuntimeError('Output "%s" is not empty' % output)
                 logging.info('Clean output path "%s"', output)
                 shutil.rmtree(output)
             shutil.move(distpath, output)
