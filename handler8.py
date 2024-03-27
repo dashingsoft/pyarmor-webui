@@ -344,6 +344,8 @@ class ProjectHandler(BaseHandler):
                 if len(output) < 4:
                     # Do not rmtree too short path
                     raise RuntimeError('Output path "%s" is not empty', output)
+                if not args.get('cleanOutput', False):
+                    raise RuntimeError('Output path "%s" is not empty', output)
                 logging.info('Clean output path "%s"', output)
                 shutil.rmtree(output)
             shutil.move(distpath, output)
