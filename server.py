@@ -28,7 +28,7 @@ except Exception:
     from .handler8 import RootHandler as RootHandler8
 
 
-__version__ = '2.1'
+__version__ = '2.3'
 
 __config__ = {
     'version': __version__,

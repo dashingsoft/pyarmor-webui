@@ -45,6 +45,13 @@ More Resources
 Change Logs
 -----------
 
+2.3
+~~~~~
+* Add one extra checkbox `Clean output path` when starting to build
+
+  - If it is checked, remove the output path automatically before building
+  - If it isn't checked, report error when output path exists
+
 2.2
 ~~~~~
 * Change dependent pyarmor version to ">=8.2.2" when installed by pip.
