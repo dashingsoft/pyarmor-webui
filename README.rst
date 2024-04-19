@@ -45,6 +45,11 @@ More Resources
 Change Logs
 -----------
 
+2.4
+~~~~~
+* Fix Windows issue: create new path failed
+* Fix issue: if option `--port` is set, `pyarmor-webui` could not connect to `pyarmor`
+
 2.3
 ~~~~~
 * Add one extra checkbox `Clean output path` when starting to build

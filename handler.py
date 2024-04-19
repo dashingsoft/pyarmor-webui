@@ -134,17 +134,20 @@ class DirectoryHandler(BaseHandler):
 
     def do_new(self, args):
         self._check_arg('path', args)
+        path = self._format_path(args)
+        self._check_arg('path', path)
 
-        if not os.path.exists(args):
-            os.makedirs(args)
-        return os.path.abspath(args)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return os.path.abspath(path)
 
     def do_remove(self, args):
         self._check_arg('path', args, invalids=['.', '/'])
-        self._check_path(args)
+        path = self._format_path(args)
+        self._check_path(path)
 
-        os.rmdir(args)
-        return os.path.abspath(args)
+        os.rmdir(path)
+        return os.path.abspath(path)
 
     def do_list(self, args):
         path = os.path.expandvars(args.get('path', '/'))
