@@ -1,7 +1,7 @@
 from sys import platform
 from setuptools import setup
 
-__version__ = '2.4'
+__version__ = '2.5'
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -63,6 +63,6 @@ setup(
         ],
     },
 
-    install_requires=['pyarmor>=8.2.2'] + (
+    install_requires=['pyarmor>=8.5.4'] + (
         ['pywin32'] if platform == 'win32' else []),
 )

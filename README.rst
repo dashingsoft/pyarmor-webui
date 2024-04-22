@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+2.5
+~~~~~
+* Support PyInstaller 6.0+ for pack
+
 2.4
 ~~~~~
 * Fix Windows issue: create new path failed
