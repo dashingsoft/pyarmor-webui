@@ -11,7 +11,7 @@ Test Teardown     Close Browser
 *** Variables ***
 ${SRC}                 ${WORKPATH}/__src__
 ${FINAL BUNDLE}        ${SRC}/dist/myapp
-${OUTER LICENSE}       ${DATAHOME}/licenses/reg-000001/license.lic
+${OUTER LICENSE}       ${DATAHOME}/licenses/reg-000001/pyarmor.rkey
 
 *** Test Cases ***
 Prepare Test Data

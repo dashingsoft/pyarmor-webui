@@ -16,6 +16,7 @@ Prepare Test Data
     Remove Directory    ${SRC}    True
     Create Directory    ${SRC}
     Create File    ${SRC}/main.py    print("This is pyarmor-webui test")
+    Create File    ${SRC}/README    this is test data file
 
 Pack Script To One File Bundle
     Open Browser To Home Page
@@ -27,7 +28,7 @@ Pack Script To One File Bundle
     Click Button    Next
     Click Button    Next
     Select Bundle    all to one file
-    Click Button    Pack    
+    Click Button    Pack
     Wait Until Building End
     Page Should Contain    Pack obfuscated scripts successfully
 

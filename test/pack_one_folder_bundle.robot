@@ -16,6 +16,7 @@ Prepare Test Data
     Remove Directory    ${SRC}    True
     Create Directory    ${SRC}
     Create File    ${SRC}/main.py    print("This is pyarmor-webui test")
+    Create File    ${SRC}/README    this is test data file
 
 Pack Script To One Folder
     Open Browser To Home Page
