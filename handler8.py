@@ -4,6 +4,7 @@ import os
 import shutil
 import sys
 
+from json import dumps as json_dumps
 from shlex import split as shell_split
 from subprocess import Popen
 from tempfile import TemporaryDirectory
@@ -240,38 +241,43 @@ class ProjectHandler(BaseHandler):
 
         src = self._format_path(args.get('src'))
         name = args.get('bundleName')
+        entries = args.get('entry', [])
+        entryname = name if name else os.path.splitext(entries[0])[0]
+
         output = self._format_path(args.get('output'))
         if not output:
             output = os.path.join(src, 'dist')
-        entries = args.get('entry', [])
-        cmd_args = ['gen']
+        cmd_args = ['gen', '--output', output]
 
         if target:
             pack = args.get('pack', [])
             self._check_arg('pack', pack, types=list)
             pyi_options = self._handle_pack_options(src, pack)
-            binext = '.exe' if sys.platform.startswith('win') else ''
-            entryname = name if name else os.path.splitext(entries[0])[0]
-            bundle = entryname + binext
-            distpath = os.path.basename(output)
             if target in (2, 3):
-                pyi_options.append('--onefile')
-                distfile = os.path.join(distpath, bundle)
+                cmd_args.extend(['--pack', 'onefile'])
             else:
-                distfile = os.path.join(distpath, entryname, bundle)
-            pyi_options.extend(['--distpath', distpath])
-            cmd_args.extend(['--pack', distfile])
-
-            if args.get('cleanOutput', False):
-                pyi_options.append('-y')
-            elif os.path.exists(output):
-                raise RuntimeError('Output "%s" is not empty' % output)
+                cmd_args.extend(['--pack', 'onedir'])
 
             if name:
                 pyi_options.extend(['--name', name])
 
-            pyi_options.append(os.path.join(src, entries[0]))
-            call_pyinstaller(pyi_options)
+            if pyi_options:
+                optdata = 'json::%s' % json_dumps(pyi_options)
+                call_pyarmor(
+                    ['cfg', 'pack:pyi_options', optdata],
+                    homepath=homepath
+                )
+
+            if args.get('cleanOutput', False):
+                if os.path.exists(output):
+                    if len(output) < 4:
+                        # Do not rmtree too short path
+                        raise RuntimeError('Too short output "%s"' % output)
+                    logging.info('Clean output path "%s"', output)
+                    shutil.rmtree(output)
+
+            elif os.path.exists(output):
+                raise RuntimeError('Output "%s" is not empty' % output)
 
         else:
             if args.get('noRuntime'):
@@ -286,8 +292,6 @@ class ProjectHandler(BaseHandler):
                     cmd_args.append('--enable-themida')
                     pnames = [x.replace('themida', 'windows') for x in pnames]
                 cmd_args.extend(['--platform', ','.join(pnames)])
-
-            cmd_args.extend(['--output', output])
 
         restrict_mode = args.get('restrictMode', DEFAULT_RESTRICT_FLAG)
         if restrict_mode & NO_RESTRICT_FLAG:
@@ -345,16 +349,6 @@ class ProjectHandler(BaseHandler):
             cmd_args.extend([b for a, b in inputs if a and b.endswith('.py')])
 
         call_pyarmor(cmd_args, homepath=homepath, debug=debug)
-        if target:
-            if os.path.exists(output):
-                if len(output) < 4:
-                    # Do not rmtree too short path
-                    raise RuntimeError('Output "%s" is not empty' % output)
-                if not args.get('cleanOutput', False):
-                    raise RuntimeError('Output "%s" is not empty' % output)
-                logging.info('Clean output path "%s"', output)
-                shutil.rmtree(output)
-            shutil.move(distpath, output)
 
         if isinstance(licfile, str) and os.path.exists(licfile):
             licpath = os.path.join(output, entryname if target == 1 else '')
