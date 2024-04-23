@@ -216,7 +216,7 @@ class ProjectHandler(BaseHandler):
 
         while i < n:
             v = str(result[i])
-            if v in ('--onefile', '-F', '--onefolder', '-D', '--name', '-N',
+            if v in ('--onefile', '-F', '--onedir', '-D', '--name', '-n',
                      '--noconfirm', '-y', '--distpath', '--specpath'):
                 raise RuntimeError('Option "%s" could not be used here' % v)
             if v in ('--add-data', '--add-binary'):
