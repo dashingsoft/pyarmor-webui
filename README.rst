@@ -45,6 +45,10 @@ More Resources
 Change Logs
 -----------
 
+2.6
+~~~~~
+* Fix some pack options bugs
+
 2.5
 ~~~~~
 * Support PyInstaller 6.0+ for pack
