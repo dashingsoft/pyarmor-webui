@@ -63,6 +63,6 @@ setup(
         ],
     },
 
-    install_requires=['pyarmor>=8.5.7'] + (
+    install_requires=['pyarmor>=8.5.8'] + (
         ['pywin32'] if platform == 'win32' else []),
 )
